@@ -1,30 +1,89 @@
 'use client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useState,useEffect } from 'react';
-import { AuthProvider,useAuth } from "react-oidc-context";
+import { useState,useLayoutEffect } from 'react';
+import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
-import { API_ROOT } from '../../config';
-import { UserManagerSettings, WebStorageStateStore } from "oidc-client";
+import { API_ROOT,OIDC_CONFIG } from '../../config';
 
-const CURRENT_ROOT = 'http://192.168.1.5:1234';
-const OPENID_ROOT = "https://openid.cc98.org";
+const HomeContent = () => {
 
-const OIDC_CONFIG: UserManagerSettings = {
-  client_id: "acce963f-2ee5-4e94-a9c2-08db7f014b10",
-  response_type: "code",
-  scope: "openid cc98-api offline_access",
-  authority: OPENID_ROOT,
-  redirect_uri: `${CURRENT_ROOT}/`,
-  silent_redirect_uri: `${CURRENT_ROOT}/`,
-  userStore: new WebStorageStateStore({ store: window.localStorage }),
-  monitorSession: false,
-  automaticSilentRenew: true,
-  validateSubOnSilentRenew: true,
-  includeIdTokenInSilentRenew: false,
-  loadUserInfo: false,
-};
+  const auth = useAuth();
 
+  return (
+    <div className='font-mono flex justify-center items-center flex-col min-h-screen space-y-5 '>
+      <div className='text-7xl mb-20'>CC98 summary</div>
+      {
+        auth.isAuthenticated ? <GetSummary auth={auth} /> : <UnLogin auth={auth} />
+      }
+    </div>
+  )
+}
+
+const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
+
+  const [loading, setLoading] = useState(false);
+  const [topicContent, setTopicContent] = useState<string[]>([]);
+
+  useLayoutEffect(() => {
+    (async() => {
+      const res = await fetch(`${API_ROOT}/me/recent-topic?from=0&size=20`,{
+        method: 'GET',
+        headers:{
+          Authorization: `Bearer ${auth.user?.access_token}`,
+        }
+      })
+      const data = await res.json();
+      const tmpTopicContent = data.map(async (item:any) => {
+        const topicContent = await fetch(`${API_ROOT}/topic/${item.id}/post?from=0&size=1`,{
+          method: 'GET',
+          headers:{ 
+            Authorization: `Bearer ${auth.user?.access_token}`,
+          }
+        });
+        const topicContentData = await topicContent.json();
+        return topicContentData[0];
+      })
+      const topicContent = await Promise.all(tmpTopicContent);
+      setTopicContent(topicContent);
+    })()
+  },[])
+
+  console.log('topicContent', topicContent)
+
+  return (
+    <LoadingButton
+    loading={loading}
+    loadingPosition="start"
+    startIcon={<ArrowForwardIcon />}
+    variant="outlined"
+    onClick={() => {
+      setLoading(true);
+    }}
+    >
+      {
+        loading ? '正在获取' : '获取评价'
+      }
+    </LoadingButton>
+  )
+}
+
+const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
+  return (
+    <div>
+      <div className='text-xl font-bold'>
+        hi,请先登录
+        <Button
+          onClick={() => {
+            auth.signinRedirect();
+          }}
+        >
+          跳转到 CC98 登录中心授权
+        </Button>
+      </div>
+    </div>
+  )
+}
 
 const LoginComponent = () => {
 
@@ -79,26 +138,7 @@ export default function Home() {
         console.log(user);
       }}
     >
-      <div className='font-mono flex justify-center items-center flex-col min-h-screen space-y-5 '>
-        <div className='text-7xl mb-20'>CC98 summary</div>
-        <LoginComponent />
-        <div className='text-gray-400'>
-          点击下方按钮获取你的个人评价
-        </div>
-        <LoadingButton
-          loading={loading}
-          loadingPosition="start"
-          startIcon={<ArrowForwardIcon />}
-          variant="outlined"
-          onClick={() => {
-            setLoading(true);
-          }}
-        >
-          {
-            loading ? '正在获取' : '获取评价'
-          }
-        </LoadingButton>
-      </div>
+      <HomeContent />
     </AuthProvider>
   )
 }
