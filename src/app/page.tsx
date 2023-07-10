@@ -85,48 +85,6 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
   )
 }
 
-const LoginComponent = () => {
-
-  const auth = useAuth();
-  console.log('auth', auth)
-  
-  useEffect(() => {
-    fetch(`${API_ROOT}/me`, {
-      method: 'GET',
-      headers:{ Authorization: `Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6IjAzQTg0MkUwMjlENkE2MzQzNUVFNzNDODk5MDI4MkNGMzk5Mzc4QjBSUzI1NiIsInR5cCI6ImF0K2p3dCIsIng1dCI6IkE2aEM0Q25XcGpRMTduUEltUUtDenptVGVMQSJ9.eyJuYmYiOjE2ODg4Mjg1NDIsImV4cCI6MTY4ODgzMjE0MiwiaXNzIjoiaHR0cHM6Ly9vcGVuaWQuY2M5OC5vcmciLCJhdWQiOiJjYzk4LWFwaSIsImNsaWVudF9pZCI6ImFjY2U5NjNmLTJlZTUtNGU5NC1hOWMyLTA4ZGI3ZjAxNGIxMCIsInN1YiI6IjY0MjIwOCIsImF1dGhfdGltZSI6MTY4ODgyNzcyNiwiaWRwIjoibG9jYWwiLCJ1bmlxdWVfbmFtZSI6Iuayiem7mGlscyIsIm5hbWUiOiLmsonpu5hpbHMiLCJmb3J1bS5wcml2aWxlZ2UiOjQsImp0aSI6IjUxQzFFNzZGNzNGQ0JFMkE0MDhDRjcwNDJFOTE2MkM1Iiwic2lkIjoiMjZBQzU4MjI0MEFBRDIwNTQ3RUE4NUM1MzlFRDk3QTUiLCJpYXQiOjE2ODg4Mjg1NDIsInNjb3BlIjpbIm9wZW5pZCIsImNjOTgtYXBpIiwib2ZmbGluZV9hY2Nlc3MiXSwiYW1yIjpbImlkc3J2Il19.T2fYCYTPzzWNKkr1LNN1-owBzGo_JRDd9aJrv-0CG9Sph6qbiW5R1tmHQUUD5zhkm99DwOf1__DLtFHayqec3aRHf02zq7Xjhip6ClAfeOKVdtgo3JA9jbYX3JFr2l9_4nsNyw9Sr2kRpjJWanpuJk5oLTcdbkZVbaj6ckTYr8FBh9kTQTbWw6cWZvQT4INOnQnBWiCKacVO2iWEFMIBmcRHFoeWISefvC99J2JSrMPTQOBeHsxpG3iqFM5hyAlkVvSJzUz7BG-shzykvfW8Zw4A3-rbuTeevmxOazWU8tu6aLxPUqnnNzg7ApOVYHzCuiqcRuM0FfvQBMra2w3vhA` },
-    }).then(res => {
-      res.json()
-    }).then(res => {
-      console.log('my info',res);
-    })
-  },[])
-  
-
-  return (
-    <div>
-      <div className='text-xl font-bold'>
-        hi,请先登录
-        <Button
-          onClick={() => {
-            auth.signinRedirect();
-          }}
-        >
-          跳转到 CC98 登录中心授权
-        </Button>
-      </div>
-      <div>
-        <Button
-          onClick={() => {
-            auth.signoutPopup();
-          }}
-        >
-          退出登录
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 export default function Home() {
 
   const [loading, setLoading] = useState(false);

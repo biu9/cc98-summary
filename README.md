@@ -14,10 +14,10 @@
 
 ### TODO
 
-- [  ] 使用正则匹配将markdown格式的帖子转换成纯字符串
-- [  ] 接入react-query
-- [  ] 接入azure openai GPT-3.5
-- [  ] 增加版面过滤功能(e.g. 心灵)
-- [  ] 增加关键字过滤功能(e.g. 回忆卷)
-- [  ] webvpn下运行
-- [  ] cloudflare pages发布
+- [ ] 使用正则匹配将markdown格式的帖子转换成纯字符串
+- [ ] 接入react-query
+- [ ] 接入azure openai GPT-3.5
+- [ ] 增加版面过滤功能(e.g. 心灵)
+- [ ] 增加关键字过滤功能(e.g. 回忆卷)
+- [ ] webvpn下运行
+- [ ] cloudflare pages发布
