@@ -1,10 +1,11 @@
 'use client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useState,useLayoutEffect } from 'react';
+import { useState,useLayoutEffect,useEffect } from 'react';
 import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
 import { API_ROOT,OIDC_CONFIG } from '../../config';
+import { WebStorageStateStore,UserManagerSettings } from "oidc-client-ts";
 
 const HomeContent = () => {
 
@@ -87,9 +88,24 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
 
 export default function Home() {
 
+  const [dynamicConfig, setDynamicConfig] = useState<UserManagerSettings>({
+    ...OIDC_CONFIG
+  })
+
+  useEffect(() => {
+    const CURRENT_ROOT = window.location.origin; 
+    const userStore = new WebStorageStateStore({ store: window.localStorage });
+    setDynamicConfig({
+      ...dynamicConfig,
+      userStore,
+      redirect_uri: `${CURRENT_ROOT}/`,
+      silent_redirect_uri: `${CURRENT_ROOT}/`,
+    })
+  },[])
+  console.log('dynamicConfig', dynamicConfig)
   return (
     <AuthProvider
-      {...OIDC_CONFIG}
+      {...dynamicConfig}
       onSigninCallback={(user) => {
         console.log(user);
       }}
