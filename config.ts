@@ -1,5 +1,4 @@
 'use client'
-import React from "react";
 import { UserManagerSettings } from "oidc-client-ts";
 
 const API_ROOT = "https://api.cc98.org";
