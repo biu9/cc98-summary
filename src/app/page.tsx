@@ -5,7 +5,6 @@ import { useState,useLayoutEffect,useEffect } from 'react';
 import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
 import { API_ROOT,OIDC_CONFIG } from '../../config';
-import { WebStorageStateStore,UserManagerSettings } from "oidc-client-ts";
 import summary from '@/utils/getSummary';
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
@@ -103,25 +102,9 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
 }
 
 export default function Home() {
-
-  const [dynamicConfig, setDynamicConfig] = useState<UserManagerSettings>({
-    ...OIDC_CONFIG
-  })
-
-  useEffect(() => {
-    const CURRENT_ROOT = window.location.origin; 
-    const userStore = new WebStorageStateStore({ store: window.localStorage });
-    setDynamicConfig({
-      ...dynamicConfig,
-      userStore,
-      redirect_uri: `${CURRENT_ROOT}/`,
-      silent_redirect_uri: `${CURRENT_ROOT}/`,
-    })
-  },[])
-  console.log('dynamicConfig', dynamicConfig)
   return (
     <AuthProvider
-      {...dynamicConfig}
+      {...OIDC_CONFIG}
       onSigninCallback={(user) => {
         console.log(user);
       }}
