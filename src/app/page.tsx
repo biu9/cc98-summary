@@ -6,6 +6,17 @@ import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
 import { API_ROOT,OIDC_CONFIG } from '../../config';
 import { WebStorageStateStore,UserManagerSettings } from "oidc-client-ts";
+import summary from '@/utils/getSummary';
+
+const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
+const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
+
+const messages = [
+  { role: "system", content: "You are a helpful assistant." },
+  { role: "user", content: "Does Azure OpenAI support customer managed keys?" },
+  { role: "assistant", content: "Yes, customer managed keys are supported by Azure OpenAI" },
+  { role: "user", content: "Do other Azure Cognitive Services support this too" },
+];
 
 const HomeContent = () => {
 
@@ -60,6 +71,11 @@ const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
     variant="outlined"
     onClick={() => {
       setLoading(true);
+      if(!endpoint || !azureApiKey) {
+        throw new Error('endpoint or azureApiKey is not defined')
+      } else {
+        summary({ endpoint,azureApiKey,messages })        
+      }
     }}
     >
       {
