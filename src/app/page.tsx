@@ -87,8 +87,6 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
 
 export default function Home() {
 
-  const [loading, setLoading] = useState(false);
-
   return (
     <AuthProvider
       {...OIDC_CONFIG}
