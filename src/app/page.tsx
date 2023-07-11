@@ -1,7 +1,7 @@
 'use client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useState,useLayoutEffect } from 'react';
+import { useState,useLayoutEffect, Dispatch, SetStateAction } from 'react';
 import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
 import { OIDC_CONFIG,PROMPT } from '../../config';
@@ -18,19 +18,33 @@ let messages = [
 
 const HomeContent = () => {
 
+  const [summary, setSummary] = useState<string>('');
+
   const auth = useAuth();
 
   return (
     <div className='font-mono flex justify-center items-center flex-col min-h-screen space-y-5 '>
       <div className='text-7xl mb-20'>CC98 summary</div>
       {
-        auth.isAuthenticated ? <GetSummary auth={auth} /> : <UnLogin auth={auth} />
+        auth.isAuthenticated ? <GetSummary auth={auth} setSummary={setSummary}/> : <UnLogin auth={auth} />
+      }
+      {
+        summary ? <SummaryContent content={summary} /> : null
       }
     </div>
   )
 }
 
-const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
+const SummaryContent = ({ content }:{ content:string }) => {
+  return (
+    <div className='w-96 border-2 p-6 border-black rounded-xl break-words'>
+      <div className='text-xl font-bold'>总结结果</div>
+      {content}
+    </div>
+  )
+}
+
+const GetSummary = ({ auth,setSummary }:{ auth:AuthContextProps,setSummary:Dispatch<SetStateAction<string>> }) => {
 
   const [loading, setLoading] = useState(false);
   const [summaryContent, setSummaryContent] = useState<string>('');
@@ -39,7 +53,7 @@ const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
     (async() => {
       if(auth.user?.access_token) {
         const topicContent = await getTopicContent(auth.user?.access_token);
-        messages[1].content = topicContent        
+        messages[1].content = topicContent;
       } else {
         throw new Error('access_token is not defined')
       }
@@ -61,6 +75,7 @@ const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
           summary({ endpoint,azureApiKey,messages }).then(res => {
             setSummaryContent(res);
             setLoading(false);
+            setSummary(res);
           })    
         }
       }}
