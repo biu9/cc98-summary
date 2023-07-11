@@ -11,6 +11,8 @@ const TOPIC_PER_REQUEST = 20;// 一次请求的主题数量
 
 const MAX_TOPIC_COUNT = 100;// 最多请求的主题数量 
 
+const PROMPT = "现在你是一个专业的心理医生,请根据以下文字为咨询者做一个人格类型总结,要求总结给出你的论据:"
+
 const OIDC_CONFIG:UserManagerSettings = {
   client_id: "acce963f-2ee5-4e94-a9c2-08db7f014b10",
   response_type: "code",
@@ -30,4 +32,5 @@ export {
     OIDC_CONFIG,
     TOPIC_PER_REQUEST,
     MAX_TOPIC_COUNT,
+    PROMPT
 }

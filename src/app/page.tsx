@@ -1,19 +1,18 @@
 'use client';
 import LoadingButton from '@mui/lab/LoadingButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { useState,useLayoutEffect,useEffect } from 'react';
+import { useState,useLayoutEffect } from 'react';
 import { AuthProvider,useAuth,AuthContextProps } from "react-oidc-context";
 import { Button } from '@mui/material';
-import { API_ROOT,OIDC_CONFIG } from '../../config';
+import { OIDC_CONFIG,PROMPT } from '../../config';
 import summary from '@/utils/getSummary';
-import { getMarkdownContent } from '@/utils/getMarkdonwContent';
 import getTopicContent from '@/utils/getAllTopic';
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
 
 let messages = [
-  { role: "system", content: "现在你是一个专业的心理医生,请根据以下文字为咨询者做一个人格类型总结,要求总结给出你的论据:" },
+  { role: "system", content: PROMPT },
   { role: "user", content: "" },
 ];
 
