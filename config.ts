@@ -7,9 +7,11 @@ const OPENID_ROOT = "https://openid.cc98.org";
 
 const CURRENT_ROOT = "http://192.168.1.5:1234";
 
-const TOPIC_PER_REQUEST = 20;// 一次请求的主题数量
+const TOPIC_PER_REQUEST = 20; // 一次请求的主题数量
 
-const MAX_TOPIC_COUNT = 100;// 最多请求的主题数量 
+const MAX_TOPIC_COUNT = 100; // 最多请求的主题数量 
+
+const MAX_CONCURRENCY = 5; // 并发请求数量
 
 const PROMPT = "现在你是一个专业的心理医生,请根据以下文字为咨询者做一个人格类型总结,要求总结给出你的论据:"
 
@@ -32,5 +34,6 @@ export {
     OIDC_CONFIG,
     TOPIC_PER_REQUEST,
     MAX_TOPIC_COUNT,
-    PROMPT
+    PROMPT,
+    MAX_CONCURRENCY
 }
