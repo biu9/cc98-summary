@@ -1,4 +1,5 @@
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
+import { error } from "console";
 
 async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, azureApiKey: string, messages: any[] }) {
   const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
@@ -9,7 +10,8 @@ async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, a
       return result.choices[0].message.content;
     else
       return "出错了";
-  } catch {
+  } catch (error) {
+    console.log(error);
     return "出错了";
   }
 }
