@@ -47,13 +47,13 @@ const SummaryContent = ({ content }:{ content:string }) => {
 const GetSummary = ({ auth,setSummary }:{ auth:AuthContextProps,setSummary:Dispatch<SetStateAction<string>> }) => {
 
   const [loading, setLoading] = useState(false);
-  const [summaryContent, setSummaryContent] = useState<string>('');
 
   useLayoutEffect(() => {
     (async() => {
       if(auth.user?.access_token) {
         const topicContent = await getTopicContent(auth.user?.access_token);
         messages[1].content = topicContent;
+        console.log('message',messages[1].content)
       } else {
         throw new Error('access_token is not defined')
       }
@@ -73,7 +73,6 @@ const GetSummary = ({ auth,setSummary }:{ auth:AuthContextProps,setSummary:Dispa
           throw new Error('endpoint or azureApiKey is not defined')
         } else {
           summary({ endpoint,azureApiKey,messages }).then(res => {
-            setSummaryContent(res);
             setLoading(false);
             setSummary(res);
           })    
@@ -84,9 +83,6 @@ const GetSummary = ({ auth,setSummary }:{ auth:AuthContextProps,setSummary:Dispa
           loading ? '正在获取' : '获取评价'
         }
       </LoadingButton>
-      {
-        summaryContent
-      }
     </div>
   )
 }
