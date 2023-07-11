@@ -7,6 +7,7 @@ import { Button } from '@mui/material';
 import { API_ROOT,OIDC_CONFIG } from '../../config';
 import summary from '@/utils/getSummary';
 import { getMarkdownContent } from '@/utils/getMarkdonwContent';
+import getTopicContent from '@/utils/getAllTopic';
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
@@ -33,44 +34,18 @@ const HomeContent = () => {
 const GetSummary = ({ auth }:{ auth:AuthContextProps }) => {
 
   const [loading, setLoading] = useState(false);
-  const [topicContent, setTopicContent] = useState<string[]>([]);
   const [summaryContent, setSummaryContent] = useState<string>('');
 
   useLayoutEffect(() => {
     (async() => {
-      const res1 = await fetch(`${API_ROOT}/me/recent-topic?from=0&size=20`,{
-        method: 'GET',
-        headers:{
-          Authorization: `Bearer ${auth.user?.access_token}`,
-        }
-      })
-      const res2 = await fetch(`${API_ROOT}/me/recent-topic?from=20&size=20`,{
-        method: 'GET',
-        headers:{
-          Authorization: `Bearer ${auth.user?.access_token}`,
-        }
-      })
-      const data1 = await res1.json();
-      const data2 = await res2.json();
-      const data = [...data1,...data2];
-      const tmpTopicContent = data.map(async (item:any) => {
-        const topicContent = await fetch(`${API_ROOT}/topic/${item.id}/post?from=0&size=1`,{
-          method: 'GET',
-          headers:{ 
-            Authorization: `Bearer ${auth.user?.access_token}`,
-          }
-        });
-        const topicContentData = await topicContent.json();
-        return topicContentData[0];
-      })
-      const topicContent = await Promise.all(tmpTopicContent);
-      setTopicContent(topicContent);
+      if(auth.user?.access_token) {
+        const topicContent = await getTopicContent(auth.user?.access_token);
+        messages[1].content = topicContent        
+      } else {
+        throw new Error('access_token is not defined')
+      }
     })()
   },[])
-
-  topicContent.forEach((item:any) => {
-    messages[1].content += getMarkdownContent(item.title+item.content);
-  })
 
   return (
     <div>

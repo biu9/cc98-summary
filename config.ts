@@ -5,7 +5,11 @@ const API_ROOT = "https://api.cc98.org";
 
 const OPENID_ROOT = "https://openid.cc98.org";
 
-const CURRENT_ROOT = "http://192.168.1.5:1234"
+const CURRENT_ROOT = "http://192.168.1.5:1234";
+
+const TOPIC_PER_REQUEST = 20;// 一次请求的主题数量
+
+const MAX_TOPIC_COUNT = 100;// 最多请求的主题数量 
 
 const OIDC_CONFIG:UserManagerSettings = {
   client_id: "acce963f-2ee5-4e94-a9c2-08db7f014b10",
@@ -24,4 +28,6 @@ const OIDC_CONFIG:UserManagerSettings = {
 export {
     API_ROOT,
     OIDC_CONFIG,
+    TOPIC_PER_REQUEST,
+    MAX_TOPIC_COUNT,
 }
