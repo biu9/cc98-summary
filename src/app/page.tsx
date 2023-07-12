@@ -105,6 +105,8 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
 }
 
 export default function Home() {
+
+  console.log('debug',endpoint,azureApiKey)
   return (
     <AuthProvider
       {...OIDC_CONFIG}
