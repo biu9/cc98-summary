@@ -1,5 +1,4 @@
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
-import { error } from "console";
 
 async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, azureApiKey: string, messages: any[] }) {
 
