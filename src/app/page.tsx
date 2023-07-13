@@ -105,14 +105,6 @@ const UnLogin = ({ auth }:{ auth:AuthContextProps }) => {
 }
 
 export default function Home() {
-
-  console.log('debug',endpoint,azureApiKey)
-  if(!endpoint || !azureApiKey)  {
-    throw new Error('endpoint or azureApiKey is not defined')
-  }
-  summary({ endpoint,azureApiKey,messages }).then(res => {
-    console.log(res);
-  })
   return (
     <AuthProvider
       {...OIDC_CONFIG}
