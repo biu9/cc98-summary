@@ -6,6 +6,8 @@ import summary from "./getSummary";
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
 
+export const runtime = 'edge';
+
 export async function POST(request:NextRequest):Promise<NextResponse<ISummaryResponse>> {
     const req = await request.json()
     const message = req.messages
