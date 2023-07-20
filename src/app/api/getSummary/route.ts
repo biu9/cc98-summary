@@ -20,19 +20,12 @@ export async function POST(request:NextRequest):Promise<NextResponse<ISummaryRes
         })        
     }
 
-    try {
-        const res = await summary({
-            messages
-        })
-        return NextResponse.json({
-            msg:res,
-            code:200
-        })        
-    } catch (error) {
-        return NextResponse.json({
-            msg:'看起来是openai出了问题,报错具体信息: '+error as string,
-            code:500
-        })        
-    }
+    const res = await summary({
+        messages
+    })
+    return NextResponse.json({
+        msg:res,
+        code:200
+    })        
 
 }
