@@ -17,9 +17,9 @@ async function summary({ messages }:{ messages: ChatMessage[] }) {
     if(result.choices[0].message?.content) 
       return result.choices[0].message.content;
     else
-      return "请求openai接口出错,返回值为空 endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
+      return "请求openai接口出错,返回值为空";
   } catch (error) {
-    return "请求openai接口出错,error, endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
+    return "请求openai接口出错,error"+error;
   }
 }
 
