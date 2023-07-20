@@ -22,4 +22,5 @@
 - [ ] webvpn下运行
 - [x] cloudflare pages发布
 - [x] 增加获取全部帖子功能 & 优化并发请求
-  - [ ] 并发控制util函数
+  - [x] 并发控制util函数
+- [ ] 单元测试
