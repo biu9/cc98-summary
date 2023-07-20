@@ -6,16 +6,15 @@ import {
   useLayoutEffect,
   Dispatch,
   SetStateAction,
-  useEffect,
 } from "react";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { Button } from "@mui/material";
 import { OIDC_CONFIG, PROMPT } from "../../config";
-import summary from "@/utils/getSummary";
 import getTopicContent from "@/utils/getAllTopic";
+import { POST } from "@/request";
+import { ISummaryResponse,ISummaryRequest } from "@request/api";
 
-const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
-const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
+const SUMMARY_URL = 'api/getSummary'
 
 let messages = [
   { role: "system", content: PROMPT },
@@ -76,22 +75,22 @@ const GetSummary = ({
   return (
     <div>
       <LoadingButton
-        loading={loading}
+        loading={loading || !getTopicsFinished}
         loadingPosition="start"
         startIcon={<ArrowForwardIcon />}
         disabled={!getTopicsFinished}
         variant="outlined"
         onClick={() => {
           setLoading(true);
-          if (!endpoint || !azureApiKey) {
-            setSummary("endpoint or azureApiKey is not defined");
-            throw new Error("endpoint or azureApiKey is not defined");
-          } else {
-            summary({ endpoint, azureApiKey, messages }).then((res) => {
+          POST<ISummaryRequest,ISummaryResponse>({ messages },SUMMARY_URL)
+            .then((res) => {
               setLoading(false);
-              setSummary(res);
-            });
-          }
+              setSummary(res.msg);
+            })
+            .catch(err => {
+              setLoading(false);
+              setSummary(err);
+            })
         }}
       >
         {!getTopicsFinished
