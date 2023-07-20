@@ -9,7 +9,7 @@ async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, a
     if(result.choices[0].message?.content) 
       return result.choices[0].message.content;
     else
-      return "出错了";
+      return "出错了, endpoint"+endpoint+"azure key"+azureApiKey;
   } catch (error) {
     console.log(error);
     return "出错了";
