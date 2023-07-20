@@ -5,7 +5,7 @@ const API_ROOT = "https://api.cc98.org";
 
 const OPENID_ROOT = "https://openid.cc98.org";
 
-const CURRENT_ROOT = "https://cc98-summary.pages.dev/";
+const CURRENT_ROOT = "https://cc98-summary.vercel.app/";
 
 const TOPIC_PER_REQUEST = 20; // 一次请求的主题数量
 
