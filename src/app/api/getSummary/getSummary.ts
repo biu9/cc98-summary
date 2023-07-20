@@ -1,6 +1,14 @@
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
+import { ChatMessage } from "@azure/openai";
 
-async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, azureApiKey: string, messages: any[] }) {
+const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
+const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
+
+async function summary({ messages }:{ messages: ChatMessage[] }) {
+
+  if(!endpoint || !azureApiKey) {
+    return "endpoint or azureApiKey is not defined"
+  }
 
   const client = new OpenAIClient(endpoint, new AzureKeyCredential(azureApiKey));
   const deploymentId = "thy111";
@@ -9,9 +17,9 @@ async function summary({ endpoint, azureApiKey, messages }:{ endpoint: string, a
     if(result.choices[0].message?.content) 
       return result.choices[0].message.content;
     else
-      return "出错了, endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
+      return "请求openai接口出错,返回值为空 endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
   } catch (error) {
-    return "出错了, endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
+    return "请求openai接口出错,error, endpoint"+endpoint+"azure key"+azureApiKey+"messages"+messages;
   }
 }
 

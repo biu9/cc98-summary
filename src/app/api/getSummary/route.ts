@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { ISummaryResponse } from "@request/api";
 import summary from "./getSummary";
+import { ChatMessage } from "@azure/openai";
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
@@ -10,7 +11,7 @@ export const runtime = 'edge';
 
 export async function POST(request:NextRequest):Promise<NextResponse<ISummaryResponse>> {
     const req = await request.json()
-    const message = req.messages
+    const messages = req.messages as ChatMessage[]
 
     if(!endpoint || !azureApiKey) {
         return NextResponse.json({
@@ -21,9 +22,7 @@ export async function POST(request:NextRequest):Promise<NextResponse<ISummaryRes
 
     try {
         const res = await summary({
-            endpoint,
-            azureApiKey,
-            messages: message
+            messages
         })
         return NextResponse.json({
             msg:res,
