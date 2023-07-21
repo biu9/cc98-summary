@@ -4,7 +4,7 @@ import { MAX_CONCURRENCY } from "../../config";
  * @param requests 
  * @param max 
  */
-export function requestQueue(requests: any[], max:number=MAX_CONCURRENCY) {
+export function requestQueue<R>(requests: (()=>Promise<R>)[], max:number=MAX_CONCURRENCY):Promise<R[]> {
     return new Promise((resolve,reject) => {
         const tasks = [...requests];
         const res: any = [];
@@ -15,8 +15,8 @@ export function requestQueue(requests: any[], max:number=MAX_CONCURRENCY) {
                 if(running === 0) {
                     resolve(res);
                 }
-            } else {
-                const task = tasks.shift();
+            } else if(tasks.length > 0 && running < max) {
+                const task = tasks.shift() as ()=>Promise<R>;
                 running++;
                 const data = await task();
                 running--;

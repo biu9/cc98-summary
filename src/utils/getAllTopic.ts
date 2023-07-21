@@ -1,6 +1,7 @@
 import { API_ROOT,TOPIC_PER_REQUEST,MAX_TOPIC_COUNT } from "../../config";
 import { ITopic,IPost } from "@cc98/api";
 import { getMarkdownContent } from "./getMarkdonwContent";
+import { requestQueue } from "./requestQueue";
 
 /**
  * 转换2018-10-10T01:43:26.11+08:00格式的时间
@@ -37,6 +38,7 @@ const getAllTopic = async (token:string) => {
 export default async function getTopicContent(token:string) {
     let message = "";
     const topics = await getAllTopic(token);
+    /*
     const topicContent = topics.map(async(topic:ITopic) => {
         const tmp = await fetch(`${API_ROOT}/Topic/${topic.id}/post?from=0&size=1`,{
             method: 'GET',
@@ -47,7 +49,21 @@ export default async function getTopicContent(token:string) {
         const data = await tmp.json();
         return data[0];
     })
-    const topicData = await Promise.all(topicContent);
+    */
+   const topicArr = topics.map((topic:ITopic) => {
+        return async () => {
+            const tmp = await fetch(`${API_ROOT}/Topic/${topic.id}/post?from=0&size=1`,{
+                method: 'GET',
+                headers:{ 
+                    Authorization: `Bearer ${token}`,
+                }
+            });
+            const data = await tmp.json();
+            return data[0] as IPost;
+        }
+    });
+    const topicData = await requestQueue<IPost>(topicArr);
+    // const topicData = await Promise.all(topicContent);
     topicData.forEach((topic:IPost) => {
         message += translateTime(topic.time)+','+topic.title+','+getMarkdownContent(topic.content)+'||';
     })
