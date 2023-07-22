@@ -2,6 +2,7 @@ import { API_ROOT,TOPIC_PER_REQUEST,MAX_TOPIC_COUNT } from "../../config";
 import { ITopic,IPost } from "@cc98/api";
 import { getMarkdownContent } from "./getMarkdonwContent";
 import { requestQueue } from "./requestQueue";
+import { GET } from "@/request";
 
 /**
  * 转换2018-10-10T01:43:26.11+08:00格式的时间
@@ -16,13 +17,7 @@ const translateTime = (time:string) => {
 }
 
 const getTopic = async(from:string,token:string):Promise<ITopic[]> => {
-    const res = await fetch(`${API_ROOT}/me/recent-topic?from=${from}&size=${TOPIC_PER_REQUEST}`,{
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        }
-    });
-    const data = await res.json();
+   const data = await GET<ITopic[]>(`${API_ROOT}/me/recent-topic?from=${from}&size=${TOPIC_PER_REQUEST}`,token);
     return data;
 }
 
@@ -38,32 +33,13 @@ const getAllTopic = async (token:string) => {
 export default async function getTopicContent(token:string) {
     let message = "";
     const topics = await getAllTopic(token);
-    /*
-    const topicContent = topics.map(async(topic:ITopic) => {
-        const tmp = await fetch(`${API_ROOT}/Topic/${topic.id}/post?from=0&size=1`,{
-            method: 'GET',
-            headers:{ 
-              Authorization: `Bearer ${token}`,
-            }
-        });
-        const data = await tmp.json();
-        return data[0];
-    })
-    */
    const topicArr = topics.map((topic:ITopic) => {
         return async () => {
-            const tmp = await fetch(`${API_ROOT}/Topic/${topic.id}/post?from=0&size=1`,{
-                method: 'GET',
-                headers:{ 
-                    Authorization: `Bearer ${token}`,
-                }
-            });
-            const data = await tmp.json();
-            return data[0] as IPost;
+           const data = await GET<IPost[]>(`${API_ROOT}/Topic/${topic.id}/post?from=0&size=1`,token);
+            return data[0];
         }
     });
     const topicData = await requestQueue<IPost>(topicArr);
-    // const topicData = await Promise.all(topicContent);
     topicData.forEach((topic:IPost) => {
         message += translateTime(topic.time)+','+topic.title+','+getMarkdownContent(topic.content)+'||';
     })

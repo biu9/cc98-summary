@@ -1,9 +1,10 @@
-export function POST<T,R>(payload: T, url: string) {
+export function POST<T,R>(payload: T, url: string, token?:string) {
   return new Promise<R>((resolve, reject) => {
     fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify(payload),
     })
