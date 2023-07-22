@@ -6,12 +6,12 @@ export function GET<R>(url:string, token?:string): Promise<R> {
                 Authorization: `Bearer ${token}`
             }
         })
-            .then(res => res.json())
-            .then(res => {
-                resolve(res)
-            })
-            .catch(err => {
-                reject(err)
-            })
+        .then(res => res.json())
+        .then(res => {
+            resolve(res)
+        })
+        .catch(err => {
+            reject(err)
+        })
     })
 }
