@@ -9,15 +9,18 @@ import {
 } from "react";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { Button } from "@mui/material";
-import { OIDC_CONFIG, PROMPT } from "../../config";
+import { OIDC_CONFIG } from "../../config";
 import getTopicContent from "@/utils/getAllTopic";
-import { POST } from "@/request";
+import { POST,GET } from "@/request";
 import { ISummaryResponse,ISummaryRequest } from "@request/api";
+import { API_ROOT } from "../../config";
+import { IUser } from "@cc98/api";
+import { setInitPrompt } from "@/utils/getInitPrompt";
 
 const SUMMARY_URL = 'api/getSummary'
 
 let messages = [
-  { role: "system", content: PROMPT },
+  { role: "system", content: '' },
   { role: "user", content: "" },
 ];
 
@@ -62,8 +65,9 @@ const GetSummary = ({
     (async () => {
       if (auth.user?.access_token) {
         const topicContent = await getTopicContent(auth.user?.access_token);
+        const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.access_token);
+        messages[0].content = setInitPrompt(profile.name)
         messages[1].content = topicContent;
-        console.log("message", messages[1].content);
         setGetTopicsFinished(true);
       } else {
         setSummary("access_token is not defined");
@@ -125,7 +129,7 @@ export default function Home() {
     <AuthProvider
       {...OIDC_CONFIG}
       onSigninCallback={(user) => {
-        console.log(user);
+        // console.log(user);
       }}
     >
       <HomeContent />
