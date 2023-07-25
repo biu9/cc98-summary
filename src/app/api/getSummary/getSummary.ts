@@ -19,7 +19,7 @@ async function summary({ messages }:{ messages: ChatMessage[] }) {
     else
       return "请求openai接口出错,返回值为空";
   } catch (error) {
-    return "请求openai接口出错,error"+error;
+    return "请求openai接口出错,error"+JSON.stringify(error);
   }
 }
 
