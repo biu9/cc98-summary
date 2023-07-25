@@ -1,6 +1,6 @@
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
 import { ChatMessage } from "@azure/openai";
-import { encode, decode } from 'gpt-3-encoder';
+import { encode, decode } from 'gpt-tokenizer';
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
