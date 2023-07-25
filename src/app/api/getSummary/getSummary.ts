@@ -1,6 +1,6 @@
 import { OpenAIClient, AzureKeyCredential } from "@azure/openai";
 import { ChatMessage } from "@azure/openai";
-import tiktoken from 'tiktoken'
+import { encode, decode } from 'gpt-3-encoder';
 
 const endpoint = process.env.NEXT_PUBLIC_AZURE_OPENAI_ENDPOINT;
 const azureApiKey = process.env.NEXT_PUBLIC_AZURE_OPENAI_KEY;
@@ -9,11 +9,9 @@ const MAX_TOKEN = 16000;
 
 async function summary({ messages }:{ messages: ChatMessage[] }) {
 
-  const enc = tiktoken.encoding_for_model("gpt-3.5-turbo-16k")
-
   if(messages[1].content) {
-    if(enc.encode(messages[1].content).length > MAX_TOKEN) {
-      messages[1].content = new TextDecoder().decode(enc.decode(enc.encode(messages[1].content).slice(0, MAX_TOKEN-500)));
+    if(encode(messages[1].content).length > MAX_TOKEN) {
+      messages[1].content = decode(encode(messages[1].content).slice(0, MAX_TOKEN-500));
     }
   }
 
