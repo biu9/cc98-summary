@@ -1,11 +1,44 @@
 "use client";
 import { TabContext, TabList, TabPanel } from "@mui/lab"
-import { Tabs, Tab, Box } from "@mui/material"
+import { Tabs, Tab, Box, Button } from "@mui/material"
 import { useState } from "react"
 import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
+import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
+import { OIDC_CONFIG } from "../../config";
+
+const UnauthenticatedApp = () => {
+  const auth = useAuth()
+
+  return (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <div>未登录, </div>
+      <Button onClick={() => auth.signinRedirect()}>点击跳转cc98登录中心授权</Button>
+    </div>
+  )
+}
 
 export default function Home() {
+
+  return (
+    <AuthProvider {...OIDC_CONFIG}>
+      <App />
+    </AuthProvider>
+  )
+}
+
+const App = () => {
+  const auth = useAuth()
+
+  return <AuthenticatedApp />
+
+  if(auth.isAuthenticated) {
+    return <AuthenticatedApp />
+  }
+  return <UnauthenticatedApp />
+}
+
+const AuthenticatedApp = () => {
 
   const [value, setValue] = useState("1")
 
