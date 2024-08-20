@@ -1,15 +1,20 @@
 "use client"
 import { useState } from "react"
 import { Button, Paper } from "@mui/material"
+import { handleMBTI } from "@/utils/handleMBTI"
 
 export default function MBTI() {
   
-  const [mbti, setMBTI] = useState("111")
+  const [mbti, setMBTI] = useState("");
+
+  const handleClick = async () => {
+    const res = await handleMBTI(mbti);
+  }
 
   if(!mbti) {
     return (
       <Paper sx={{ display: 'inline-block' }}>
-        <Button >开始测试</Button>
+        <Button onClick={handleClick}>开始测试</Button>
       </Paper>
     )
   }

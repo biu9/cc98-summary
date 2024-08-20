@@ -1,12 +1,19 @@
 "use client";
 import { TabContext, TabList, TabPanel } from "@mui/lab"
-import { Tab, Box, Button } from "@mui/material"
-import { useState, useEffect } from "react"
+import { Tab, Box, Button, Alert } from "@mui/material"
+import { useState, useEffect, useContext, createContext } from "react"
 import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
 import { POST } from "@/request";
+
+type FeedbackContextType = {
+  feedback: string;
+  setFeedback: (feedback: string, type: 'success' | 'error') => void;
+}
+
+const FeedbackContext = createContext<FeedbackContextType | null>(null);
 
 const UnauthenticatedApp = () => {
   const auth = useAuth()
@@ -21,17 +28,36 @@ const UnauthenticatedApp = () => {
 
 export default function Home() {
 
+  const [feedback, setFeedback] = useState<string>('');
+
+  const setFeedbackFunc = (feedback: string, type: 'success' | 'error') => {
+    setFeedback(feedback);
+  }
+
+  const clearFeedback = () => {
+    setFeedback('');
+  }
+
   // test
-  useEffect(() => {
-    (async() => {
-      const res = await POST<any,any>('/api/mbti', {})
-      console.log(res);
-    })()
-  },[])
+  // useEffect(() => {
+  //   (async() => {
+  //     try {
+  //       const res = await POST<any,any>('/api/mbti', {})
+  //       console.log(res);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   })()
+  // },[])
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
+      <FeedbackContext.Provider value={{ feedback: '', setFeedback: setFeedbackFunc }}>
+      {
+        feedback && <Alert severity="warning" onClose={clearFeedback}>{feedback}</Alert>
+      }
       <App />
+      </FeedbackContext.Provider>
     </AuthProvider>
   )
 }

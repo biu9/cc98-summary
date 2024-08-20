@@ -19,6 +19,6 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     message: 'success',
-    data: text
+    data: text,
   })
 }
