@@ -1,19 +1,22 @@
-export function POST<T,R>(payload: T, url: string, token?:string) {
-  return new Promise<R>((resolve, reject) => {
-    fetch(url, {
+export async function POST<T, R>(url: string, payload: T, token?: string): Promise<R> {
+  try {
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
+        ...(token && { Authorization: `Bearer ${token}` })
       },
       body: JSON.stringify(payload),
-    })
-      .then((res) => res.json())
-      .then((res) => {
-        resolve(res)
-      })
-      .catch((err) => {
-        reject(err)
-      })
-  })
+    });
+
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
+    const data = await res.json();
+    return data as R;
+  } catch (error) {
+    console.error('POST request failed:', error);
+    throw error;
+  }
 }

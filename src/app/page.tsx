@@ -1,11 +1,12 @@
 "use client";
 import { TabContext, TabList, TabPanel } from "@mui/lab"
-import { Tabs, Tab, Box, Button } from "@mui/material"
-import { useState } from "react"
+import { Tab, Box, Button } from "@mui/material"
+import { useState, useEffect } from "react"
 import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
+import { POST } from "@/request";
 
 const UnauthenticatedApp = () => {
   const auth = useAuth()
@@ -19,6 +20,14 @@ const UnauthenticatedApp = () => {
 }
 
 export default function Home() {
+
+  // test
+  useEffect(() => {
+    (async() => {
+      const res = await POST<any,any>('/api/mbti', {})
+      console.log(res);
+    })()
+  },[])
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
