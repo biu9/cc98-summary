@@ -1,25 +1,23 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { IGeneralResponse } from "@request/api";
+import { IGeneralResponse, IMBTIRequest } from "@request/api";
 
 const genAi = new GoogleGenerativeAI(process.env.API_KEY!);
 
 const model = genAi.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-const prompt = '你好';
-
 export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
-  const { userInfo } = await request.json();
+  const { text } = await request.json() as IMBTIRequest;
 
   try {
-    const result = await model.generateContent(prompt);
+    const result = await model.generateContent(text);
     const response = result.response;
-    const text = response.text();
+    const resultText = response.text();
 
     return NextResponse.json({
       isOk: true,
-      data: text,
+      data: resultText,
       msg: "success",
     });
   } catch (error) {

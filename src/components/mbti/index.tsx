@@ -1,27 +1,40 @@
 "use client"
 import { useState, useContext } from "react"
-import { Button, Paper } from "@mui/material"
-import { handleMBTI } from "@/utils/handleMBTI"
+import LoadingButton from "@mui/lab/LoadingButton";
+import { Paper } from "@mui/material"
 import { FeedbackContext } from "@/app/page"
+import { POST } from "@/request"
+import { IGeneralResponse, IMBTIRequest } from "@request/api"
+
+const handleMBTI = async (text: string): Promise<IGeneralResponse> => {
+  const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
+    text
+  });
+  return res;
+}
 
 export default function MBTI() {
   const feedbackContext = useContext(FeedbackContext);
-  const setFeedback = feedbackContext?.setFeedback;
   const [mbti, setMBTI] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const setFeedback = feedbackContext?.setFeedback;
 
   const handleClick = async () => {
-    const res = await handleMBTI(mbti);
-    if(res.isOk) {
+    setLoading(true);
+    const res = await handleMBTI('你好,现在是什么时候?');
+    if (res.isOk) {
       setMBTI(res.data);
     } else {
       setFeedback && setFeedback(res.msg);
     }
+    setLoading(false);
   }
 
-  if(!mbti) {
+  if (!mbti) {
     return (
       <Paper sx={{ display: 'inline-block' }}>
-        <Button onClick={handleClick}>开始测试</Button>
+        <LoadingButton loading={loading} onClick={handleClick}>开始测试</LoadingButton>
       </Paper>
     )
   }
@@ -29,10 +42,10 @@ export default function MBTI() {
   return (
     <Paper sx={{ padding: 4 }}>
       <div>xxx的测试结果:</div>
-      <div>{mbti}</div>
+      <div className="py-4">{mbti}</div>
       <div>
-        <Button variant="contained">生成海报</Button>
-        <Button >重新测试</Button>
+        <LoadingButton variant="contained" loading={loading} onClick={handleClick}>生成海报</LoadingButton>
+        <LoadingButton loading={loading} onClick={handleClick}>重新测试</LoadingButton>
       </div>
     </Paper>
   )

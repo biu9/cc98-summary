@@ -14,4 +14,7 @@ declare module "@request/api" {
     data: any,
     msg: string,
   }
+  export interface IMBTIRequest {
+    text: string
+  }
 }
