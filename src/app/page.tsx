@@ -6,14 +6,13 @@ import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
-import { POST } from "@/request";
 
 type FeedbackContextType = {
   feedback: string;
-  setFeedback: (feedback: string, type: 'success' | 'error') => void;
+  setFeedback: (feedback: string) => void;
 }
 
-const FeedbackContext = createContext<FeedbackContextType | null>(null);
+export const FeedbackContext = createContext<FeedbackContextType | null>(null);
 
 const UnauthenticatedApp = () => {
   const auth = useAuth()
@@ -30,7 +29,7 @@ export default function Home() {
 
   const [feedback, setFeedback] = useState<string>('');
 
-  const setFeedbackFunc = (feedback: string, type: 'success' | 'error') => {
+  const setFeedbackFunc = (feedback: string) => {
     setFeedback(feedback);
   }
 
@@ -38,23 +37,11 @@ export default function Home() {
     setFeedback('');
   }
 
-  // test
-  // useEffect(() => {
-  //   (async() => {
-  //     try {
-  //       const res = await POST<any,any>('/api/mbti', {})
-  //       console.log(res);
-  //     } catch (error) {
-  //       console.log(error);
-  //     }
-  //   })()
-  // },[])
-
   return (
     <AuthProvider {...OIDC_CONFIG}>
       <FeedbackContext.Provider value={{ feedback: '', setFeedback: setFeedbackFunc }}>
       {
-        feedback && <Alert severity="warning" onClose={clearFeedback}>{feedback}</Alert>
+        feedback && <Alert severity="error" onClose={clearFeedback}>{feedback}</Alert>
       }
       <App />
       </FeedbackContext.Provider>
