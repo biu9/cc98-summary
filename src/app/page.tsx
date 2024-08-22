@@ -6,13 +6,7 @@ import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
 import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
-
-type FeedbackContextType = {
-  feedback: string;
-  setFeedback: (feedback: string) => void;
-}
-
-export const FeedbackContext = createContext<FeedbackContextType | null>(null);
+import { FeedbackContext } from "@/store/feedBackContext";
 
 const UnauthenticatedApp = () => {
   const auth = useAuth()

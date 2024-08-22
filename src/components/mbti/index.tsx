@@ -2,7 +2,7 @@
 import { useState, useContext } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Paper } from "@mui/material"
-import { FeedbackContext } from "@/app/page"
+import { FeedbackContext } from "@/store/feedBackContext"
 import { POST } from "@/request"
 import { IGeneralResponse, IMBTIRequest } from "@request/api"
 
