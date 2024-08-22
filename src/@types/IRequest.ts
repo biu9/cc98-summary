@@ -3,18 +3,15 @@ declare module "@request/api" {
     msg: string,
     code: number
   }
-  export interface ISummaryRequest {
-    messages: {
-      role: string,
-      content: string
-    }[]
-  }
   export interface IGeneralResponse {
     isOk: boolean,
     data: any,
     msg: string,
   }
   export interface IMBTIRequest {
+    text: string
+  }
+  export interface ISummaryRequest {
     text: string
   }
 }
