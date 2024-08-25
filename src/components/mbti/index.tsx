@@ -1,10 +1,14 @@
 "use client"
-import { useState, useContext } from "react"
+import { useState, useContext, useEffect } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Paper } from "@mui/material"
 import { FeedbackContext } from "@/store/feedBackContext"
-import { POST } from "@/request"
+import { GET, POST } from "@/request"
 import { IGeneralResponse, IMBTIRequest } from "@request/api"
+import { useAuth } from "react-oidc-context";
+import { getTopicContent } from "@/utils/getTopicContent";
+import { IUser } from "@cc98/api";
+import { API_ROOT } from "../../../config";
 
 const handleMBTI = async (text: string): Promise<IGeneralResponse> => {
   const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
@@ -17,12 +21,29 @@ export default function MBTI() {
   const feedbackContext = useContext(FeedbackContext);
   const [mbti, setMBTI] = useState("");
   const [loading, setLoading] = useState(false);
+  const [profile, setProfile] = useState<IUser>();
 
   const setFeedback = feedbackContext?.setFeedback;
+  const auth = useAuth();
+
+  useEffect(() => {
+    (async () => {
+      if(auth.user?.access_token) {
+        const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.access_token);
+        setProfile(profile);
+        console.log(profile);
+      }
+    })();
+  }, [auth.user?.access_token]);
 
   const handleClick = async () => {
     setLoading(true);
-    const res = await handleMBTI('你好,现在是什么时候?');
+    if(!auth.user?.access_token) {
+      setFeedback && setFeedback("access_token is not defined");
+      return;
+    }
+    const topicContent = await getTopicContent(auth.user?.access_token);
+    const res = await handleMBTI(`请根据给出的用户发帖总结该用户的mbti，并给出对应的解释: ${topicContent}`);
     if (res.isOk) {
       setMBTI(res.data);
     } else {

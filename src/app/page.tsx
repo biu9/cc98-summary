@@ -1,10 +1,10 @@
 "use client";
 import { TabContext, TabList, TabPanel } from "@mui/lab"
 import { Tab, Box, Button, Alert } from "@mui/material"
-import { useState, useEffect, useContext, createContext } from "react"
+import { useState } from "react"
 import MBTI from "@/components/mbti";
 import Summary from "@/components/summary";
-import { AuthProvider, useAuth, AuthContextProps } from "react-oidc-context";
+import { AuthProvider, useAuth } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
 import { FeedbackContext } from "@/store/feedBackContext";
 
@@ -45,8 +45,6 @@ export default function Home() {
 
 const App = () => {
   const auth = useAuth()
-
-  return <AuthenticatedApp />
 
   if(auth.isAuthenticated) {
     return <AuthenticatedApp />

@@ -30,7 +30,7 @@ const getAllTopic = async (token:string) => {
     }
     return res;
 }
-export default async function getTopicContent(token:string) {
+export async function getTopicContent(token:string) {
     let message = "";
     const topics = await getAllTopic(token);
    const topicArr = topics.map((topic:ITopic) => {
