@@ -1,7 +1,7 @@
 "use client"
 import { useState, useContext, useEffect } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Paper } from "@mui/material"
+import { Divider, Paper } from "@mui/material"
 import { FeedbackContext } from "@/store/feedBackContext"
 import { GET, POST } from "@/request"
 import { IGeneralResponse, IMBTIRequest } from "@request/api"
@@ -43,7 +43,7 @@ export default function MBTI() {
       return;
     }
     const topicContent = await getTopicContent(auth.user?.access_token);
-    const res = await handleMBTI(`请根据给出的用户发帖总结该用户的mbti，并给出对应的解释: ${topicContent}`);
+    const res = await handleMBTI(`请根据给出的用户发帖总结该用户的mbti,并给出对应的解释: ${topicContent}`);
     if (res.isOk) {
       setMBTI(res.data);
     } else {

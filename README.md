@@ -23,17 +23,3 @@
 ![20230724000936](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/20230724000936.png)
 
 ![20230724001057](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/20230724001057.png)
-
-### TODO
-
-- [x] 使用正则匹配将markdown格式的帖子转换成纯字符串
-- [x] 接入azure openai GPT-3.5
-- [ ] 增加版面过滤功能(e.g. 心灵)
-- [ ] 增加关键字过滤功能(e.g. 回忆卷)
-- [ ] webvpn下运行
-- [x] cloudflare pages发布
-- [x] 增加获取全部帖子功能 & 优化并发请求
-  - [x] 并发控制util函数
-- [ ] 单元测试
-- [x] 将api请求转到serverless api上
-- [ ] 想一个好点儿的prompt
