@@ -1,7 +1,7 @@
 "use client"
 import { useState, useContext, useEffect } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Divider, Paper } from "@mui/material"
+import { Paper } from "@mui/material"
 import { FeedbackContext } from "@/store/feedBackContext"
 import { GET, POST } from "@/request"
 import { IGeneralResponse, IMBTIRequest, IMBTIResponse } from "@request/api"
@@ -9,6 +9,7 @@ import { useAuth } from "react-oidc-context";
 import { getTopicContent } from "@/utils/getTopicContent";
 import { IUser } from "@cc98/api";
 import { API_ROOT } from "../../../config";
+import { MBTIResultCard } from "../mbti-result-card";
 
 const handleMBTI = async (text: string, username: string): Promise<IGeneralResponse> => {
   const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
@@ -17,40 +18,6 @@ const handleMBTI = async (text: string, username: string): Promise<IGeneralRespo
   });
   return res;
 } 
-
-const MBTIRender = ({ mbti }: { mbti: IMBTIResponse }) => {
-  
-  const OneDimensionRender = ({ dimension }: {dimension: IMBTIResponse['first']}) => {
-    return (
-      <div>
-        <div>{dimension.type}</div>
-        <div>{dimension.explanation}</div>
-      </div>
-    )
-  }
-
-  const PotentialRender = ({ potential }:{ potential: IMBTIResponse['potential'] }) => {
-    return (
-      <div>
-        <div>{potential.type}</div>
-        <div>{potential.explanation}</div>
-      </div>
-    )
-  }
-  
-  
-  return (
-    <div>
-      <div>
-        <OneDimensionRender dimension={mbti.first} />
-        <OneDimensionRender dimension={mbti.second} />
-        <OneDimensionRender dimension={mbti.third} />
-        <OneDimensionRender dimension={mbti.fourth} />
-        <PotentialRender potential={mbti.potential} />
-      </div>
-    </div>
-  )
-}
 
 export default function MBTI() {
   const feedbackContext = useContext(FeedbackContext);
@@ -96,11 +63,10 @@ export default function MBTI() {
 
   return (
     <Paper sx={{ padding: 4 }}>
-      <div>{profile?.name}的测试结果:</div>
       <div className="py-4">
-        {mbti && <MBTIRender mbti={mbti} />}
+        {<MBTIResultCard results={mbti} userName={profile?.name} />}
       </div>
-      <div>
+      <div className="flex justify-center gap-4">
         <LoadingButton variant="contained" loading={loading} onClick={handleClick}>生成海报</LoadingButton>
         <LoadingButton loading={loading} onClick={handleClick}>重新测试</LoadingButton>
       </div>
