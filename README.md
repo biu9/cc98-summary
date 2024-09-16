@@ -18,8 +18,4 @@
 
 ### 演示截图
 
-![20230724000747](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/20230724000747.png)
-
-![20230724000936](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/20230724000936.png)
-
-![20230724001057](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/20230724001057.png)
+![image-20240908193728905](https://typora-1309407228.cos.ap-shanghai.myqcloud.com/image-20240908193728905.png)
