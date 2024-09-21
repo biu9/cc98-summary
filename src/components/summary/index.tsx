@@ -8,6 +8,7 @@ import { API_ROOT } from "../../../config";
 import { useAuth } from "react-oidc-context";
 import { IPost, ITopic } from "@cc98/api";
 import { requestQueue } from "@/utils/requestQueue";
+import { securityFilter } from "@/utils/securityFilter";
 
 type ReferenceProps = {
   label: string;
@@ -91,7 +92,7 @@ export default function Summary() {
     }
     const topicData = await requestQueue<IPost[]>(topicArr);
     topicData.forEach((post:IPost[]) => {
-      text += post.map(item => item.userName + ':' + item.content).join('\n\n') + '\n\n';
+      text += post.map(item => item.userName + ':' + securityFilter(item.content)).join('\n\n') + '\n\n';
     })
 
     return text;
