@@ -5,7 +5,7 @@ const API_ROOT = "https://api.cc98.org";
 
 const OPENID_ROOT = "https://openid.cc98.org";
 
-const CURRENT_ROOT = process.env.NODE_ENV === "development" ? "http://localhost:1234/" : "https://cc98-agent.vercel.app/";
+const CURRENT_ROOT = process.env.NODE_ENV === "development" ? "http://localhost:1234/" : "https://cc98agent.top/";
 
 const TOPIC_PER_REQUEST = 20; // 一次请求的主题数量
 

@@ -6,7 +6,7 @@
 export const securityFilter = (content: string): string => {
 
   const dangerousText = [
-    "请勿外传", "不要外传", "保密", "机密", "禁止传播", "泄露", "透露",
+    "请勿外传", "不要外传", "保密", "机密", "禁止传播", "泄露", "透露", "转载",
     "勿传", "不传", "qwfc", "bywc", "1勿2传", "4不要5外传",
   ]
 

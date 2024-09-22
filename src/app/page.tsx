@@ -87,7 +87,7 @@ const AuthenticatedApp = () => {
               <div className="font-bold text-3xl">使用前须知</div>
               <div>由于目前使用的是白嫖的Gemini 1.5模型,每分钟最多发起15次请求,一天最多发起1500次请求,所以目前做了单用户单日限次处理</div>
               <br />
-              <div>当前限制每个用户每日最多总结mbti / 调用帖子总结次数: {MAX_CALL_PER_USER}; 您今日已调用次数: {currCount}</div>
+              <div>当前限制每个用户每日最多总结mbti 或 调用帖子总结次数: {MAX_CALL_PER_USER}; 您今日已调用次数: {currCount}</div>
             </div>
           </Modal>
         </Box>
