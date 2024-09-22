@@ -9,7 +9,9 @@ const CURRENT_ROOT = process.env.NODE_ENV === "development" ? "http://localhost:
 
 const TOPIC_PER_REQUEST = 20; // 一次请求的主题数量
 
-const MAX_TOPIC_COUNT = 100; // 最多请求的主题数量 
+const MAX_TOPIC_COUNT = 100; // 最多请求的主题数量
+
+export const MAX_CALL_PER_USER = 5; // 每个用户最多请求的摘要数量
 
 const MAX_CONCURRENCY = 5; // 并发请求数量
 

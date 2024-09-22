@@ -4,11 +4,12 @@ import { IGeneralResponse, ISummaryRequest } from "@request/api";
 import { GET, POST } from "@/request";
 import { FeedbackContext } from "@/store/feedBackContext";
 import { debounce } from "@/utils/debounce";
-import { API_ROOT } from "../../../config";
+import { API_ROOT, MAX_CALL_PER_USER } from "../../../config";
 import { useAuth } from "react-oidc-context";
 import { IPost, ITopic } from "@cc98/api";
 import { requestQueue } from "@/utils/requestQueue";
 import { securityFilter } from "@/utils/securityFilter";
+import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
 
 type ReferenceProps = {
   label: string;
@@ -103,6 +104,9 @@ export default function Summary() {
   }
 
   const handleSubmit = async () => {
+    if(getCurrentCount() >= MAX_CALL_PER_USER) {
+      setFeedback && setFeedback("今日测试次数已用完,请明日再试");
+    }
     setLoading(true);
     const topicContent = await getTopic(auth.user?.access_token!, selectedTopic?.id, selectedTopic?.replyCount);
     const res = await POST<ISummaryRequest, IGeneralResponse>("/api/summary", {
@@ -110,6 +114,7 @@ export default function Summary() {
     });
     if (res.isOk) {
       setSummary(res.data);
+      increaseCurrentCount();
     } else {
       setFeedback && setFeedback(res.msg);
     }

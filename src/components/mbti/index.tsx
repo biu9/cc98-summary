@@ -8,8 +8,9 @@ import { IGeneralResponse, IMBTIRequest, IMBTIResponse } from "@request/api"
 import { useAuth } from "react-oidc-context";
 import { getTopicContent } from "@/utils/getTopicContent";
 import { IUser } from "@cc98/api";
-import { API_ROOT } from "../../../config";
+import { API_ROOT, MAX_CALL_PER_USER } from "../../../config";
 import { MBTIResultCard } from "../mbti-result-card";
+import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
 
 const handleMBTI = async (text: string, username: string): Promise<IGeneralResponse> => {
   const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
@@ -38,6 +39,9 @@ export default function MBTI() {
   }, [auth.user?.access_token]);
 
   const handleClick = async () => {
+    if(getCurrentCount() >= MAX_CALL_PER_USER) {
+      setFeedback && setFeedback("今日测试次数已用完,请明日再试");
+    }
     setLoading(true);
     if(!auth.user?.access_token) {
       setFeedback && setFeedback("access_token is not defined");
@@ -47,6 +51,7 @@ export default function MBTI() {
     const res = await handleMBTI(`topic: ${topicContent}`, profile?.name || ''); // FIXME
     if (res.isOk) {
       setMBTI(res.data);
+      increaseCurrentCount();
     } else {
       setFeedback && setFeedback(res.msg);
     }
@@ -67,7 +72,7 @@ export default function MBTI() {
         {<MBTIResultCard results={mbti} userName={profile?.name} />}
       </div>
       <div className="flex justify-center gap-4">
-        <LoadingButton variant="contained" loading={loading} onClick={handleClick}>生成海报</LoadingButton>
+        {/* <LoadingButton variant="contained" loading={loading} onClick={handleClick}>生成海报</LoadingButton> */}
         <LoadingButton loading={loading} onClick={handleClick}>重新测试</LoadingButton>
       </div>
     </Paper>
