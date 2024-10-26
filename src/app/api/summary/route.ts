@@ -5,7 +5,11 @@ import { IGeneralResponse, ISummaryRequest } from "@request/api";
 
 const genAi = new GoogleGenerativeAI(process.env.API_KEY!);
 
-const model = genAi.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAi.getGenerativeModel({
+  model: "gemini-1.5-flash", generationConfig: {
+    temperature: 0
+  }
+});
 
 export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
   const { text } = await request.json() as ISummaryRequest;
