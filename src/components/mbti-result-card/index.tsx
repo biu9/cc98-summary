@@ -22,99 +22,76 @@ const typeColors: { [key: string]: string } = {
 };
 
 const typeDescriptions: { [key: string]: string } = {
-  E: "Extraversion", I: "Introversion",
-  S: "Sensing", N: "Intuition",
-  T: "Thinking", F: "Feeling",
-  J: "Judging", P: "Perceiving"
+  E: "外向", I: "内向",
+  S: "实感", N: "直觉",
+  T: "思考", F: "情感",
+  J: "判断", P: "认知"
 };
 
-const MotionBox = motion(Box as any); // FIXME: 类型断言
+const MotionBox = motion(Box as any);
 
 export function MBTIResultCard({ results = defaultResults, userName = 'Your' }: { results?: IMBTIResponse, userName?: string }) {
   const actualType = results.first.type + results.second.type + results.third.type + results.fourth.type;
   const dimensions = [
-    { title: "Energy", letter: results.first.type, description: results.first.explanation },
-    { title: "Information", letter: results.second.type, description: results.second.explanation },
-    { title: "Decisions", letter: results.third.type, description: results.third.explanation },
-    { title: "Lifestyle", letter: results.fourth.type, description: results.fourth.explanation },
+    { title: "能量来源", letter: results.first.type, description: results.first.explanation },
+    { title: "信息获取", letter: results.second.type, description: results.second.explanation },
+    { title: "决策方式", letter: results.third.type, description: results.third.explanation },
+    { title: "生活态度", letter: results.fourth.type, description: results.fourth.explanation },
   ];
 
   return (
-    <Card sx={{ maxWidth: 800, margin: 'auto', overflow: 'hidden' }}>
-      <CardHeader
-        title={`${userName}的MBTI Profile`}
-        sx={{
-          backgroundColor: 'primary.main',
-          color: 'primary.contrastText',
-          textAlign: 'center'
-        }}
-      />
-      <CardContent>
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Typography variant="h4" component="h2" gutterBottom>
-            {userName}的类型: <Box component="span" sx={{ color: 'primary.main' }}>{actualType}</Box>
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
+    <div className="elegant-card overflow-hidden">
+      <div className="p-6 text-center border-b border-gray-100">
+        <h2 className="text-2xl font-light">{userName}的MBTI分析结果</h2>
+      </div>
+      
+      <div className="p-6">
+        <div className="text-center mb-8">
+          <h3 className="text-3xl font-light mb-2">
+            您的类型: <span className="font-medium">{actualType}</span>
+          </h3>
+          <p className="text-gray-500">
             {actualType.split('').map(letter => typeDescriptions[letter]).join(' • ')}
-          </Typography>
-        </Box>
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {dimensions.map((dim, index) => (
-            <Grid item xs={12} sm={6} key={index}>
-              <MotionBox
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                sx={{ 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  alignItems: 'center', 
-                  p: 2, 
-                  bgcolor: 'grey.100', 
-                  borderRadius: 1 
-                }}
+            <MotionBox
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="elegant-card p-4 flex flex-col items-center"
+            >
+              <div 
+                className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-xl mb-3"
+                style={{ backgroundColor: typeColors[dim.letter] || '#666' }}
               >
-                <Chip
-                  label={dim.letter}
-                  sx={{
-                    bgcolor: typeColors[dim.letter] || 'grey.500',
-                    color: 'white',
-                    fontSize: '1.5rem',
-                    fontWeight: 'bold',
-                    mb: 1
-                  }}
-                />
-                <Typography variant="h6" component="h3" gutterBottom>
-                  {dim.title}
-                </Typography>
-                <Typography variant="body2" textAlign="center" color="text.secondary">
-                  {dim.description}
-                </Typography>
-              </MotionBox>
-            </Grid>
+                {dim.letter}
+              </div>
+              <h4 className="text-lg font-medium mb-2">{dim.title}</h4>
+              <p className="text-gray-500 text-center text-sm">
+                {dim.description}
+              </p>
+            </MotionBox>
           ))}
-        </Grid>
+        </div>
+        
         <MotionBox
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          sx={{ 
-            p: 2, 
-            bgcolor: 'grey.100', 
-            borderRadius: 1 
-          }}
+          className="elegant-card p-4"
         >
-          <Typography variant="h6" component="h3" gutterBottom textAlign="center">
-            Potential Alternative Type: 
-            <Box component="span" sx={{ ml: 1, color: 'primary.main' }}>
-              {results.potential.type}
-            </Box>
-          </Typography>
-          <Typography variant="body2" textAlign="center" color="text.secondary">
+          <h4 className="text-lg font-medium mb-2 text-center">
+            潜在替代类型: <span className="text-blue-600 ml-1">{results.potential.type}</span>
+          </h4>
+          <p className="text-gray-500 text-center text-sm">
             {results.potential.explanation}
-          </Typography>
+          </p>
         </MotionBox>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

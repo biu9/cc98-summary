@@ -1,13 +1,17 @@
 import './globals.css'
-import { Inter } from 'next/font/google'
+import { Inter, Poppins } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
-const inter = Inter({ subsets: ['latin'] })
+const poppins = Poppins({ 
+  weight: ['200', '300', '400', '500', '600'],
+  subsets: ['latin'],
+  display: 'swap',
+})
 
 export const metadata = {
-  title: 'cc98 Agent',
-  description: 'cc98 Agent, Powered by Deepseek, Vercel',
+  title: 'CC98 Hub | 优雅体验',
+  description: 'CC98 Hub - 提供MBTI测试、文档总结等功能',
 }
 
 export default function RootLayout({
@@ -16,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
+    <html lang="zh">
+      <body className={poppins.className}>
         {children}
         <Analytics />
         <SpeedInsights />
