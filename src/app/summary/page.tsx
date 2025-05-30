@@ -13,6 +13,7 @@ import { securityFilter } from "@/utils/securityFilter";
 import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
 import Link from "next/link";
 import { AuthProvider } from "react-oidc-context";
+import { UserInfoProvider } from "@/store/userInfoContext";
 
 type ReferenceProps = {
   label: string;
@@ -228,9 +229,11 @@ export default function SummaryPage() {
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
-      <FeedbackContext.Provider value={{ feedback, setFeedback: setFeedbackFunc }}>
-        <Content />
-      </FeedbackContext.Provider>
+      <UserInfoProvider>
+        <FeedbackContext.Provider value={{ feedback, setFeedback: setFeedbackFunc }}>
+          <Content />
+        </FeedbackContext.Provider>
+      </UserInfoProvider>
     </AuthProvider>
   );
 } 

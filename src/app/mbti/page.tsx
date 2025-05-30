@@ -14,6 +14,7 @@ import { MBTIResultCard } from "@/components/mbti-result-card";
 import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
 import Link from "next/link";
 import { AuthProvider } from "react-oidc-context";
+import { UserInfoProvider } from "@/store/userInfoContext";
 
 const handleMBTI = async (text: string, username: string): Promise<IGeneralResponse> => {
   const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
@@ -158,9 +159,11 @@ export default function MBTIPage() {
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
-      <FeedbackContext.Provider value={{ feedback, setFeedback: setFeedbackFunc }}>
-        <Content />
-      </FeedbackContext.Provider>
+      <UserInfoProvider>
+        <FeedbackContext.Provider value={{ feedback, setFeedback: setFeedbackFunc }}>
+          <Content />
+        </FeedbackContext.Provider>
+      </UserInfoProvider>
     </AuthProvider>
   )
 } 

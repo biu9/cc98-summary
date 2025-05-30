@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { IUser } from '@cc98/api';
 import { GET } from '@/request';
@@ -32,7 +32,7 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const accessToken = useMemo(() => auth.user?.access_token, [auth.user?.access_token]);
   const isAuthenticated = useMemo(() => auth.isAuthenticated, [auth.isAuthenticated]);
 
-  const fetchUserInfo = async (token: string) => {
+  const fetchUserInfo = useCallback(async (token: string) => {
     if (loading) return; // 防止重复请求
     
     setLoading(true);
@@ -49,13 +49,13 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading]);
 
-  const refetch = () => {
+  const refetch = useCallback(() => {
     if (accessToken) {
       fetchUserInfo(accessToken);
     }
-  };
+  }, [accessToken, fetchUserInfo]);
 
   useEffect(() => {
     // 只在已认证且有token时获取用户信息
@@ -68,14 +68,14 @@ export const UserInfoProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setUserInfo(null);
       setError(null);
     }
-  }, [isAuthenticated, accessToken, userInfo, loading]);
+  }, [isAuthenticated, accessToken, userInfo, loading, fetchUserInfo]);
 
   const value = useMemo(() => ({
     userInfo,
     loading,
     error,
     refetch
-  }), [userInfo, loading, error]);
+  }), [userInfo, loading, error, refetch]);
 
   return (
     <UserInfoContext.Provider value={value}>
