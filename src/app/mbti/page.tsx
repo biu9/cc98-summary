@@ -1,5 +1,5 @@
 "use client"
-import { useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect, useMemo, useCallback } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Paper, Alert } from "@mui/material"
 import { FeedbackContext } from "@/store/feedBackContext"
@@ -39,14 +39,38 @@ export default function MBTIPage() {
   const Content = () => {
     const auth = useAuth();
     
+    // 使用useMemo来稳定access_token的引用
+    const accessToken = useMemo(() => auth.user?.access_token, [auth.user?.access_token]);
+    
     useEffect(() => {
-      (async () => {
-        if(auth.user?.access_token) {
-          const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.access_token);
-          setProfile(profile);
+      let isMounted = true; // 防止组件卸载后的异步操作
+      
+      const fetchProfile = async () => {
+        if (!accessToken || profile) {
+          return; // 没有token或已经有profile了就不执行
         }
-      })();
-    }, [auth.user?.access_token]);
+        
+        try {
+          console.log('Fetching user profile...');
+          const userProfile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`, accessToken);
+          if (isMounted) {
+            setProfile(userProfile);
+          }
+        } catch (error) {
+          console.error('Failed to fetch user profile:', error);
+          if (isMounted) {
+            setFeedback("获取用户信息失败，请重试");
+          }
+        }
+      };
+
+      fetchProfile();
+
+      // 清理函数
+      return () => {
+        isMounted = false;
+      };
+    }, [accessToken]); // 使用稳定的accessToken引用
   
     const handleClick = async () => {
       if(getCurrentCount() >= MAX_CALL_PER_USER) {
@@ -54,11 +78,11 @@ export default function MBTIPage() {
         return;
       }
       setLoading(true);
-      if(!auth.user?.access_token) {
+      if(!accessToken) {
         setFeedback("access_token is not defined");
         return;
       }
-      const topicContent = await getTopicContent(auth.user?.access_token);
+      const topicContent = await getTopicContent(accessToken);
       const res = await handleMBTI(`topic: ${topicContent}`, profile?.name || '');
       if (res.isOk) {
         setMBTI(res.data);

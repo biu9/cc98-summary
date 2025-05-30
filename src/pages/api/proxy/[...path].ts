@@ -76,14 +76,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // 发起代理请求
       const response = await fetch(targetUrl.toString(), fetchOptions);
       clearTimeout(timeoutId);
+
+      console.log('thy debug response', response);
       
       // 获取响应数据
       const responseText = await response.text();
       let responseData;
+
+      console.log('thy debug responseText', responseText);
       
       try {
         responseData = JSON.parse(responseText);
-      } catch {
+      } catch (error) {
+        console.log('thy debug error', error);
         // 检查是否是WebVPN登录重定向页面
         if (responseText.includes('webvpn.zju.edu.cn/portal') && responseText.includes('redirect_uri')) {
           const redirectMatch = responseText.match(/url:"([^"]*webvpn\.zju\.edu\.cn\/portal[^"]*)"/);

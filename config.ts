@@ -3,7 +3,7 @@ import { UserManagerSettings } from "oidc-client-ts";
 
 const API_ROOT =
   process.env.NODE_ENV === "development"
-    ? "https://api-cc98-org-s.webvpn.zju.edu.cn:8001"
+    ? "http://api-cc98-org-s.webvpn.zju.edu.cn:8001"
     : "https://api.cc98.org";
 
 const OPENID_ROOT =
