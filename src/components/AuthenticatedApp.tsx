@@ -28,10 +28,12 @@ import {
   Assessment as AssessmentIcon,
   Close as CloseIcon,
   ArrowForward as ArrowForwardIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import { useAuth } from "react-oidc-context";
 import { useState } from "react";
 import WebVPNStatus from "./WebVPNStatus";
+import { useUserInfo } from "@/store/userInfoContext";
 
 interface AuthenticatedAppProps {
   showModal: boolean;
@@ -45,6 +47,7 @@ const AuthenticatedApp = ({
   currCount,
 }: AuthenticatedAppProps) => {
   const auth = useAuth();
+  const { userInfo, loading: userInfoLoading } = useUserInfo();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -133,6 +136,65 @@ const AuthenticatedApp = ({
           >
             CC98 Hub
           </Typography>
+          
+          {/* 用户信息显示 */}
+          {userInfo && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mr: { xs: 2, sm: 3 },
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "20px",
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.5 },
+              }}
+            >
+              <PersonIcon
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "1rem", sm: "1.2rem" },
+                  mr: 1,
+                }}
+              />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                  fontWeight: "medium",
+                }}
+              >
+                {userInfo.name}
+              </Typography>
+            </Box>
+          )}
+          
+          {/* 加载状态显示 */}
+          {userInfoLoading && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                mr: { xs: 2, sm: 3 },
+                bgcolor: "rgba(255, 255, 255, 0.1)",
+                borderRadius: "20px",
+                px: { xs: 1.5, sm: 2 },
+                py: { xs: 0.5, sm: 0.5 },
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
+                }}
+              >
+                加载中...
+              </Typography>
+            </Box>
+          )}
+
           <Chip
             label={`剩余次数: ${Math.max(0, MAX_CALL_PER_USER - currCount)}`}
             color="secondary"
@@ -176,7 +238,7 @@ const AuthenticatedApp = ({
             mb={2}
             sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" } }}
           >
-            欢迎使用CC98 Hub
+            {userInfo ? `欢迎回来，${userInfo.name}！` : "欢迎使用CC98 Hub"}
           </Typography>
           <Typography
             variant="body1"
@@ -186,7 +248,10 @@ const AuthenticatedApp = ({
               lineHeight: { xs: 1.4, sm: 1.5 },
             }}
           >
-            您的智能CC98助手，提供多种AI驱动的功能来增强您的论坛体验
+            {userInfo 
+              ? `您的智能CC98助手已准备就绪，为您提供个性化的AI驱动功能体验` 
+              : "您的智能CC98助手，提供多种AI驱动的功能来增强您的论坛体验"
+            }
           </Typography>
         </Paper>
 

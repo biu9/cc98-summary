@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "react-oidc-context";
 import { OIDC_CONFIG } from "../../config";
 import { FeedbackContext } from "@/store/feedBackContext";
+import { UserInfoProvider } from "@/store/userInfoContext";
 import { getCurrentCount } from "@/utils/limitation";
 import UnauthenticatedApp from "@/components/UnauthenticatedApp";
 import AuthenticatedApp from "@/components/AuthenticatedApp";
@@ -28,12 +29,14 @@ export default function Home() {
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
-      <FeedbackContext.Provider value={{ feedback: '', setFeedback: setFeedbackFunc }}>
-      {
-        feedback && <Alert severity="error" onClose={clearFeedback} className="m-4">{feedback}</Alert>
-      }
-      <App showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
-      </FeedbackContext.Provider>
+      <UserInfoProvider>
+        <FeedbackContext.Provider value={{ feedback: '', setFeedback: setFeedbackFunc }}>
+        {
+          feedback && <Alert severity="error" onClose={clearFeedback} className="m-4">{feedback}</Alert>
+        }
+        <App showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
+        </FeedbackContext.Provider>
+      </UserInfoProvider>
     </AuthProvider>
   )
 }
