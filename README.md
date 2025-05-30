@@ -2,7 +2,7 @@
 
 基于Google Gemini 1.5的对于cc98帖子进行MBTI总结以及根据某个特定帖子上下文进行问答的Agent
 
-接入cc98登录中心,通过cc98-api获取帖子
+接入cc98登录中心(http://openid-cc98-org-s.webvpn.zju.edu.cn:8001/),通过cc98-api获取帖子
 
 需要在校园网下运行（webvpn不彳亍
 

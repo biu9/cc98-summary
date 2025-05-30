@@ -1,11 +1,13 @@
 "use client";
-import { Button, Alert, Modal } from "@mui/material"
+import { Button, Alert, Modal, Card, CardContent, Typography, TextField, InputAdornment, Divider, Box, Grid, Stack, Paper, List, ListItem, ListItemText, ListItemIcon } from "@mui/material"
 import { useEffect, useState } from "react"
 import { AuthProvider, useAuth } from "react-oidc-context";
 import { OIDC_CONFIG, MAX_CALL_PER_USER } from "../../config";
 import { FeedbackContext } from "@/store/feedBackContext";
 import { getCurrentCount } from "@/utils/limitation";
 import Link from "next/link";
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 const UnauthenticatedApp = () => {
   const auth = useAuth()
@@ -26,90 +28,199 @@ const UnauthenticatedApp = () => {
   }
 
   return (
-    <div className="min-h-screen p-8 flex items-center justify-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl w-full">
+    <Box className="min-h-screen p-8 flex items-center justify-center">
+      <Grid container spacing={3} className="max-w-5xl w-full">
         {/* 登录卡片 */}
-        <div className="elegant-card p-8">
-          <div className="mb-6">
-            <h1 className="text-2xl font-medium mb-1">CC98 Hub</h1>
-            <h2 className="text-lg text-gray-400 font-light">登录</h2>
-          </div>
-          
-          <div className="space-y-6 mb-8">
-            <button className="flex items-center justify-center w-full rounded-full bg-blue-50 py-3 text-blue-600 font-medium">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M6.293 9.293a1 1 0 011.414 0L10 11.586l2.293-2.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" />
-              </svg>
-              CC98授权登录
-            </button>
-            
-            <div className="relative">
-              <input 
-                type="email" 
-                placeholder="电子邮箱" 
-                className="elegant-input"
-                disabled
-              />
-            </div>
-            
-            <div className="relative">
-              <input 
-                type="password" 
-                placeholder="密码" 
-                className="elegant-input"
-                disabled
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">忘记密码?</span>
-            </div>
-          </div>
-          
-          <button 
-            onClick={() => auth.signinRedirect()}
-            className="elegant-button w-full"
+        <Grid item xs={12} md={6}>
+          <Card 
+            elevation={3} 
+            className="overflow-hidden"
+            sx={{ 
+              transition: 'all 0.3s ease',
+              '&:hover': { 
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
+                transform: 'translateY(-5px)'
+              }
+            }}
           >
-            登录
-          </button>
-          
-          <p className="text-xs text-gray-400 mt-6">
-            登录即表示您同意我们的使用条款和隐私政策。
-          </p>
-        </div>
+            <CardContent sx={{ p: 4 }}>
+              <Stack spacing={2} mb={3}>
+                <Typography variant="h5" fontWeight="500">CC98 Hub</Typography>
+                <Typography variant="subtitle1" color="text.secondary" fontWeight="300">登录</Typography>
+              </Stack>
+              
+              <Box mb={4} onClick={() => auth.signinRedirect()}>
+                <Button 
+                  fullWidth
+                  variant="contained" 
+                  color="primary"
+                  sx={{ 
+                    borderRadius: '50px', 
+                    py: 1.5,
+                    bgcolor: '#e3f2fd',
+                    color: '#1976d2',
+                    '&:hover': { 
+                      bgcolor: '#bbdefb',
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 4px 12px rgba(25, 118, 210, 0.15)'
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                  startIcon={<ArrowDropDownIcon />}
+                >
+                  CC98授权登录
+                </Button>
+                
+                <Stack spacing={2} mt={3}>
+                  <TextField
+                    fullWidth
+                    placeholder="电子邮箱(暂未开放)"
+                    variant="outlined"
+                    disabled
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '50px'
+                      }
+                    }}
+                  />
+                  
+                  <TextField
+                    fullWidth
+                    type="password"
+                    placeholder="密码(暂未开放)"
+                    variant="outlined"
+                    disabled
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': {
+                        borderRadius: '50px'
+                      }
+                    }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <Typography variant="body2" color="text.secondary">
+                            忘记密码?
+                          </Typography>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Stack>
+              </Box>
+              
+              <Button 
+                fullWidth
+                variant="contained"
+                sx={{ 
+                  borderRadius: '50px', 
+                  py: 1.5, 
+                  bgcolor: 'var(--accent-color)', 
+                  '&:hover': { 
+                    bgcolor: '#474747',
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 20px rgba(0, 0, 0, 0.15)'
+                  },
+                  transition: 'all 0.3s ease'
+                }}
+                onClick={() => auth.signinRedirect()}
+              >
+                登录
+              </Button>
+              
+              <Typography variant="caption" color="text.secondary" mt={3} display="block">
+                登录即表示您同意我们的使用条款和隐私政策。
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
         
         {/* 活动卡片 */}
-        <div className="elegant-card flex flex-col">
-          <div className="p-5 flex justify-between items-center">
-            <span className="text-sm text-gray-400">功能预览</span>
-            <span className="text-sm text-gray-400">CC98 Hub</span>
-          </div>
-          
-          <div className="flex-1 event-card flex flex-col justify-between">
-            <div>
-              <div className="date-display">{month}</div>
-              <div className="flex items-end">
-                <span className="date-display">{day}</span>
-                <span className="date-suffix">{suffix}</span>
-              </div>
-              <div className="mt-4 text-gray-500">登录后即可体验以下功能</div>
-            </div>
+        <Grid item xs={12} md={6}>
+          <Card 
+            elevation={3} 
+            className="h-full" 
+            sx={{ 
+              display: 'flex', 
+              flexDirection: 'column',
+              transition: 'all 0.3s ease',
+              '&:hover': { 
+                boxShadow: '0 12px 40px rgba(0, 0, 0, 0.12)',
+                transform: 'translateY(-5px)'
+              }
+            }}
+          >
+            <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between' }}>
+              <Typography variant="body2" color="text.secondary">功能预览</Typography>
+              <Typography variant="body2" color="text.secondary">CC98 Hub</Typography>
+            </Box>
             
-            <div className="space-y-4 mt-8">
-              <div className="flex justify-between items-center">
-                <span>MBTI测试</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div className="flex justify-between items-center">
-                <span>文档总结</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <Divider />
+            
+            <CardContent sx={{ p: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+              <Box>
+                <Typography variant="h3" fontWeight="200" sx={{ fontSize: '4rem', lineHeight: 1 }}>
+                  {month}
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'flex-end' }}>
+                  <Typography variant="h3" fontWeight="200" sx={{ fontSize: '4rem', lineHeight: 1 }}>
+                    {day}
+                  </Typography>
+                  <Typography variant="h4" fontWeight="200" color="text.secondary" sx={{ fontSize: '2.5rem' }}>
+                    {suffix}
+                  </Typography>
+                </Box>
+                <Typography variant="body1" color="text.secondary" mt={2}>
+                  登录后即可体验以下功能
+                </Typography>
+              </Box>
+              
+              <Stack spacing={2} mt={4}>
+                <List disablePadding>
+                  <ListItem 
+                    sx={{ 
+                      py: 1.5, 
+                      px: 0,
+                      borderRadius: '8px',
+                      '&:hover': { 
+                        bgcolor: 'rgba(0, 0, 0, 0.03)',
+                        '& .MuiSvgIcon-root': {
+                          transform: 'translateX(4px)',
+                          color: '#1976d2'
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemText primary="MBTI测试" />
+                    <ListItemIcon sx={{ minWidth: 'auto' }}>
+                      <ChevronRightIcon sx={{ transition: 'all 0.2s ease' }} />
+                    </ListItemIcon>
+                  </ListItem>
+                  <ListItem 
+                    sx={{ 
+                      py: 1.5, 
+                      px: 0,
+                      borderRadius: '8px',
+                      '&:hover': { 
+                        bgcolor: 'rgba(0, 0, 0, 0.03)',
+                        '& .MuiSvgIcon-root': {
+                          transform: 'translateX(4px)',
+                          color: '#1976d2'
+                        }
+                      }
+                    }}
+                  >
+                    <ListItemText primary="文档总结" />
+                    <ListItemIcon sx={{ minWidth: 'auto' }}>
+                      <ChevronRightIcon sx={{ transition: 'all 0.2s ease' }} />
+                    </ListItemIcon>
+                  </ListItem>
+                </List>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   )
 }
 
