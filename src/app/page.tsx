@@ -45,7 +45,11 @@ const App = ({ showModal, setShowModal, currCount }: {
 }) => {
   const auth = useAuth()
 
-  if(auth.isAuthenticated || process.env.NODE_ENV === "development") {
+  // if(process.env.NODE_ENV === "development") {
+  //   return <AuthenticatedApp showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
+  // }
+
+  if(auth.isAuthenticated) {
     return <AuthenticatedApp showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
   }
   return <UnauthenticatedApp />
