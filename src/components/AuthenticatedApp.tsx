@@ -15,12 +15,14 @@ import {
   Paper,
   Avatar,
   IconButton,
+  Chip,
 } from "@mui/material";
 import Link from "next/link";
 import { MAX_CALL_PER_USER } from "../../config";
-import PsychologyIcon from '@mui/icons-material/Psychology';
-import DescriptionIcon from '@mui/icons-material/Description';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Psychology as PsychologyIcon, Description as DescriptionIcon, Close as CloseIcon, ArrowForward as ArrowForwardIcon } from "@mui/icons-material";
+import { useAuth } from "react-oidc-context";
+import { useState } from "react";
+import WebVPNStatus from "./WebVPNStatus";
 
 interface AuthenticatedAppProps {
   showModal: boolean;
@@ -33,253 +35,144 @@ const AuthenticatedApp = ({
   setShowModal,
   currCount,
 }: AuthenticatedAppProps) => {
+  const auth = useAuth();
+  const [isHoveringAI, setIsHoveringAI] = useState(false);
+  const [isHoveringGenerate, setIsHoveringGenerate] = useState(false);
+
   return (
     <Box sx={{ minHeight: "100vh", py: 4, px: { xs: 2, md: 4 } }}>
-      <Card elevation={3} sx={{ mb: 4, height: "100%", pb: 10 }}>
-        <AppBar position="static" color="transparent" elevation={0}>
-          <Toolbar
-            sx={{
-              justifyContent: "space-between",
-              borderBottom: "1px solid #eee",
-              px: { xs: 2, md: 3 },
-              py: 1.5,
-            }}
-          >
-            <Typography variant="h5" fontWeight={500}>
-              CC98 Hub
-            </Typography>
-            <Stack direction="row" spacing={2}>
-              <Button
-                component={Link}
-                href="/mbti"
-                variant="contained"
-                sx={{
-                  borderRadius: "50px",
-                  bgcolor: "var(--accent-color)",
-                  "&:hover": {
-                    bgcolor: "#474747",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                MBTI测试
-              </Button>
-              <Button
-                component={Link}
-                href="/summary"
-                variant="contained"
-                sx={{
-                  borderRadius: "50px",
-                  bgcolor: "var(--accent-color)",
-                  "&:hover": {
-                    bgcolor: "#474747",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                文档总结
-              </Button>
-            </Stack>
-          </Toolbar>
-        </AppBar>
-
-        <CardContent sx={{ py: 5, textAlign: "center" }}>
-          <Typography variant="h4" fontWeight={300} mb={2}>
-            欢迎使用CC98 Hub
+      <AppBar position="static" sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            CC98 Hub
           </Typography>
-          <Typography variant="body1" color="text.secondary" mb={5}>
-            请选择上方功能开始使用
-          </Typography>
+          <Chip 
+            label={`剩余次数: ${Math.max(0, 100 - currCount)}`}
+            color="secondary"
+            variant="outlined"
+            sx={{ color: 'white', borderColor: 'white' }}
+          />
+        </Toolbar>
+      </AppBar>
 
-          <Container maxWidth="md" disableGutters sx={{ px: { xs: 2, sm: 4, md: 6 } }}>
-            <Grid container spacing={{ xs: 3, md: 4 }} sx={{ mb: 4 }}>
-              <Grid item xs={12} md={6}>
-                <Card
-                  component={Link}
-                  href="/mbti"
-                  elevation={4}
-                  sx={{
-                    p: 4,
-                    display: "block",
-                    textDecoration: "none",
-                    height: "100%",
-                    minHeight: "150px",
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    position: "relative",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      boxShadow: "0 16px 40px rgba(0, 0, 0, 0.12)",
-                      borderColor: "transparent",
-                      "& .arrow-icon": {
-                        transform: "translateX(4px)",
-                        opacity: 1,
-                      }
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                    <Avatar sx={{ bgcolor: "rgba(25, 118, 210, 0.12)", color: "primary.main", width: 45, height: 45 }}>
-                      <PsychologyIcon fontSize="medium" />
-                    </Avatar>
-                    <Typography variant="h6" fontWeight={500}>
-                      MBTI测试
-                    </Typography>
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    基于您的发帖记录分析您的MBTI人格类型
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <WebVPNStatus />
+        
+        <Grid container spacing={4}>
+          <Grid item xs={12} md={6}>
+            <Card 
+              elevation={4}
+              sx={{ 
+                minHeight: "150px",
+                border: '1px solid #e0e0e0',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                transform: isHoveringAI ? 'translateY(-4px)' : 'translateY(0)',
+                boxShadow: isHoveringAI ? '0 8px 25px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  borderColor: '#667eea'
+                }
+              }}
+              onMouseEnter={() => setIsHoveringAI(true)}
+              onMouseLeave={() => setIsHoveringAI(false)}
+              onClick={() => setShowModal(true)}
+            >
+              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar sx={{ bgcolor: '#667eea', mr: 2 }}>
+                    <PsychologyIcon />
+                  </Avatar>
+                  <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                    AI助手
                   </Typography>
-                  <Box 
-                    className="arrow-icon"
-                    sx={{
-                      position: "absolute",
-                      bottom: 16,
-                      right: 16,
-                      opacity: 0.5,
-                      transition: "all 0.3s ease",
-                    }}
-                  >
-                    <ArrowForwardIcon color="primary" />
-                  </Box>
-                </Card>
-              </Grid>
+                  <ArrowForwardIcon 
+                    sx={{ 
+                      ml: 'auto', 
+                      transition: 'transform 0.3s ease',
+                      transform: isHoveringAI ? 'translateX(4px)' : 'translateX(0)'
+                    }} 
+                  />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
+                  智能分析您的CC98活动数据，提供个性化的内容推荐和使用习惯分析。
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
 
-              <Grid item xs={12} md={6}>
-                <Card
-                  component={Link}
-                  href="/summary"
-                  elevation={4}
-                  sx={{
-                    p: 4,
-                    display: "block",
-                    textDecoration: "none",
-                    height: "100%",
-                    minHeight: "150px",
-                    border: "1px solid rgba(0,0,0,0.08)",
-                    position: "relative",
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                      transform: "translateY(-8px)",
-                      boxShadow: "0 16px 40px rgba(0, 0, 0, 0.12)",
-                      borderColor: "transparent",
-                      "& .arrow-icon": {
-                        transform: "translateX(4px)",
-                        opacity: 1,
-                      }
-                    },
-                  }}
-                >
-                  <Stack direction="row" spacing={2} alignItems="center" mb={2}>
-                    <Avatar sx={{ bgcolor: "rgba(46, 125, 50, 0.12)", color: "success.main", width: 45, height: 45 }}>
-                      <DescriptionIcon fontSize="medium" />
-                    </Avatar>
-                    <Typography variant="h6" fontWeight={500}>
-                      文档总结
-                    </Typography>
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    对论坛帖子内容进行智能总结和问答
+          <Grid item xs={12} md={6}>
+            <Card 
+              elevation={4}
+              sx={{ 
+                minHeight: "150px",
+                border: '1px solid #e0e0e0',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                transform: isHoveringGenerate ? 'translateY(-4px)' : 'translateY(0)',
+                boxShadow: isHoveringGenerate ? '0 8px 25px rgba(0,0,0,0.15)' : '0 2px 10px rgba(0,0,0,0.1)',
+                '&:hover': {
+                  borderColor: '#764ba2'
+                }
+              }}
+              onMouseEnter={() => setIsHoveringGenerate(true)}
+              onMouseLeave={() => setIsHoveringGenerate(false)}
+            >
+              <CardContent sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar sx={{ bgcolor: '#764ba2', mr: 2 }}>
+                    <DescriptionIcon />
+                  </Avatar>
+                  <Typography variant="h6" component="h2" sx={{ fontWeight: 'bold' }}>
+                    生成报告
                   </Typography>
-                  <Box 
-                    className="arrow-icon"
-                    sx={{
-                      position: "absolute",
-                      bottom: 16,
-                      right: 16,
-                      opacity: 0.5,
-                      transition: "all 0.3s ease",
-                    }}
-                  >
-                    <ArrowForwardIcon color="success" />
-                  </Box>
-                </Card>
-              </Grid>
-            </Grid>
-          </Container>
-        </CardContent>
-      </Card>
+                  <ArrowForwardIcon 
+                    sx={{ 
+                      ml: 'auto', 
+                      transition: 'transform 0.3s ease',
+                      transform: isHoveringGenerate ? 'translateX(4px)' : 'translateX(0)'
+                    }} 
+                  />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{ flexGrow: 1 }}>
+                  基于您的CC98使用数据，生成详细的个人活动报告和数据可视化图表。
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
 
       <Modal
         open={showModal}
         onClose={() => setShowModal(false)}
-        aria-labelledby="notice-modal-title"
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
       >
-        <Paper
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "90%", md: 450 },
-            p: 4,
-            borderRadius: 2,
-            outline: "none",
-            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
-          }}
-        >
-          <Typography
-            id="notice-modal-title"
-            variant="h5"
-            fontWeight={600}
-            mb={2}
-          >
-            使用前须知
-          </Typography>
-          <Typography variant="body2" mb={3}>
-            由于目前使用的是白嫖的Gemini
-            1.5模型，每分钟最多发起15次请求，一天最多发起1500次请求，所以目前做了单用户单日限次处理。
-          </Typography>
-
-          <Stack spacing={1.5} mb={3}>
-            <Typography variant="body1" fontWeight={500}>
-              当前限制：
-              <Typography
-                component="span"
-                color="primary"
-                fontWeight={600}
-                sx={{ ml: 1 }}
-              >
-                每个用户每日最多调用次数: {MAX_CALL_PER_USER}
-              </Typography>
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: '90%',
+          maxWidth: 400,
+          bgcolor: 'background.paper',
+          border: '2px solid #000',
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2
+        }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              功能开发中
             </Typography>
-
-            <Typography variant="body1" fontWeight={500}>
-              您今日已调用次数：
-              <Typography
-                component="span"
-                color="primary"
-                fontWeight={600}
-                sx={{ ml: 1 }}
-              >
-                {currCount}
-              </Typography>
-            </Typography>
-          </Stack>
-
-          <Button
-            fullWidth
-            variant="contained"
-            sx={{
-              mt: 2,
-              borderRadius: "50px",
-              py: 1,
-              bgcolor: "var(--accent-color)",
-              "&:hover": {
-                bgcolor: "#474747",
-                transform: "translateY(-2px)",
-                boxShadow: "0 6px 20px rgba(0, 0, 0, 0.15)",
-              },
-              transition: "all 0.3s ease",
-            }}
-            onClick={() => setShowModal(false)}
-          >
-            我已了解
-          </Button>
-        </Paper>
+            <IconButton onClick={() => setShowModal(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+            AI助手功能正在开发中，敬请期待！
+          </Typography>
+        </Box>
       </Modal>
     </Box>
   );
