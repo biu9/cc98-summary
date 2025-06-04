@@ -152,7 +152,13 @@ const options: swaggerJSDoc.Options = {
       }
     }
   },
-  apis: ['./src/app/api/**/*.ts'], // 扫描API路由文件
+  apis: [
+    './src/app/api/**/*.ts',
+    './src/app/api/summary/route.ts',
+    './src/app/api/mbti/route.ts', 
+    './src/app/api/llm/chat/route.ts',
+    process.cwd() + '/src/app/api/**/*.ts'
+  ], // 多种路径格式确保扫描到
 };
 
 const swaggerSpec = swaggerJSDoc(options);
