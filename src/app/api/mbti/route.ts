@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IGeneralResponse, IMBTIRequest, IMBTIResponse } from "@request/api";
 import { SchemaType } from '@google/generative-ai';
+import { withCors } from "@/lib/cors";
 
 const genAi = new GoogleGenerativeAI(process.env.API_KEY!);
 
@@ -173,8 +174,16 @@ const assignDefaultMBTIResponseData = (data: IMBTIResponse): IMBTIResponse => {
  *               isOk: false
  *               data: ""
  *               msg: "错误信息"
+ *   options:
+ *     tags:
+ *       - MBTI
+ *     summary: CORS预检请求
+ *     description: 处理CORS预检请求
+ *     responses:
+ *       200:
+ *         description: 预检请求成功
  */
-export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
+async function handler(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
   const { text, username } = await request.json() as IMBTIRequest;
 
   const mbtiPrompt = `请根据给出的${username}发帖总结${username}的mbti,要求输出json格式,且描述时以${username}指代用户:`  
@@ -199,3 +208,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<IGeneralR
     });
   }
 }
+
+export const POST = withCors(handler);
+export const OPTIONS = withCors(async () => NextResponse.json({}));

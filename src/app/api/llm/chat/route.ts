@@ -1,6 +1,7 @@
 import { generateText } from "ai";
+import { google } from "@ai-sdk/google";
 import { NextRequest, NextResponse } from "next/server";
-import { google } from "@/lib/models";
+import { withCors } from "@/lib/cors";
 
 /**
  * @swagger
@@ -41,20 +42,23 @@ import { google } from "@/lib/models";
  *               text: "你好！我是AI助手，很高兴为您服务。"
  *       500:
  *         description: 服务器内部错误
+ *   options:
+ *     tags:
+ *       - Chat
+ *     summary: CORS预检请求
+ *     description: 处理CORS预检请求
+ *     responses:
+ *       200:
+ *         description: 预检请求成功
  */
-export async function POST(request: NextRequest) {
-  try {
-    const { messages } = await request.json();
-    const response = await generateText({
-      model: google("gemini-2.0-flash-exp"),
-      messages,
-    });
-    return NextResponse.json(response);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: JSON.stringify(error) },
-      { status: 500 }
-    );
-  }
+async function handler(request: NextRequest) {
+  const { messages } = await request.json();
+  const response = await generateText({
+    model: google("gemini-2.0-flash-exp"),
+    messages,
+  });
+  return NextResponse.json(response);
 }
+
+export const POST = withCors(handler);
+export const OPTIONS = withCors(async () => NextResponse.json({}));

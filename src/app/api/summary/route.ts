@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { IGeneralResponse, ISummaryRequest } from "@request/api";
+import { withCors } from "@/lib/cors";
 
 const genAi = new GoogleGenerativeAI(process.env.API_KEY!);
 
@@ -48,8 +49,16 @@ const model = genAi.getGenerativeModel({
  *               isOk: false
  *               data: ""
  *               msg: "错误信息"
+ *   options:
+ *     tags:
+ *       - Summary
+ *     summary: CORS预检请求
+ *     description: 处理CORS预检请求
+ *     responses:
+ *       200:
+ *         description: 预检请求成功
  */
-export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
+async function handler(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
   const { text } = await request.json() as ISummaryRequest;
 
   try {
@@ -70,3 +79,6 @@ export async function POST(request: NextRequest): Promise<NextResponse<IGeneralR
     });
   }
 }
+
+export const POST = withCors(handler);
+export const OPTIONS = withCors(async () => NextResponse.json({}));
