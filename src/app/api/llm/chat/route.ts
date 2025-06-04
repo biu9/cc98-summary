@@ -1,7 +1,8 @@
-import { streamText } from "ai";
+import { streamText, tool } from "ai";
 import { google } from "@/lib/models";
 import { NextRequest, NextResponse } from "next/server";
 import { withCors } from "@/lib/cors";
+import { z } from "zod";
 
 /**
  * @swagger
@@ -53,6 +54,20 @@ async function handler(request: NextRequest) {
     const result = streamText({
       model: google("gemini-2.0-flash-exp"),
       messages,
+      tools: {
+        weather: tool({
+          description: "Get the weather in a location",
+          parameters: z.object({
+            location: z
+              .string()
+              .describe("The location to get the weather for"),
+          }),
+          execute: async ({ location }) => ({
+            location,
+            temperature: 72 + Math.floor(Math.random() * 21) - 10,
+          }),
+        }),
+      },
     });
 
     return result.toDataStreamResponse();
