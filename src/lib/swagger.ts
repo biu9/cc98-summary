@@ -11,7 +11,7 @@ const options: swaggerJSDoc.Options = {
     servers: [
       {
         url: process.env.NODE_ENV === 'production' 
-          ? 'https://your-domain.com' 
+          ? 'https://cc98agent.top' 
           : 'http://localhost:1234',
         description: process.env.NODE_ENV === 'production' ? '生产环境' : '开发环境',
       },
