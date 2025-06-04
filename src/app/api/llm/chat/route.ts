@@ -1,6 +1,6 @@
 import { streamText } from "ai";
 import { google } from "@/lib/models";
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { withCors } from "@/lib/cors";
 
 /**
@@ -48,14 +48,21 @@ import { withCors } from "@/lib/cors";
  */
 async function handler(request: NextRequest) {
   const { messages } = await request.json();
-  
-  const result = await streamText({
-    model: google("gemini-2.0-flash-exp"),
-    messages,
-  });
-  
-  return result.toDataStreamResponse();
+
+  try {
+    const result = streamText({
+      model: google("gemini-2.0-flash-exp"),
+      messages,
+    });
+
+    return result.toDataStreamResponse();
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: JSON.stringify(error) }, { status: 500 });
+  }
 }
 
 export const POST = withCors(handler);
-export const OPTIONS = withCors(async () => new Response(null, { status: 200 }));
+export const OPTIONS = withCors(
+  async () => new Response(null, { status: 200 })
+);
