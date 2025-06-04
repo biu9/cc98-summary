@@ -10,8 +10,8 @@ const poppins = Poppins({
 })
 
 export const metadata = {
-  title: 'CC98 Hub | 优雅体验',
-  description: 'CC98 Hub - 提供MBTI测试、文档总结等功能',
+  title: 'CC98 Agent',
+  description: 'CC98 Agent - 提供MBTI测试、文档总结等功能',
 }
 
 export default function RootLayout({

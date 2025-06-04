@@ -11,6 +11,44 @@ const model = genAi.getGenerativeModel({
   }
 });
 
+/**
+ * @swagger
+ * /api/summary:
+ *   post:
+ *     tags:
+ *       - Summary
+ *     summary: 文本内容总结
+ *     description: 使用AI对输入的文本内容进行智能总结
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ISummaryRequest'
+ *           example:
+ *             text: "这是一段需要总结的长文本内容..."
+ *     responses:
+ *       200:
+ *         description: 总结成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/IGeneralResponse'
+ *             example:
+ *               isOk: true
+ *               data: "这是总结后的内容"
+ *               msg: "success"
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/IGeneralResponse'
+ *             example:
+ *               isOk: false
+ *               data: ""
+ *               msg: "错误信息"
+ */
 export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
   const { text } = await request.json() as ISummaryRequest;
 

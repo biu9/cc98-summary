@@ -8,6 +8,26 @@
 
 ❗本项目给出的总结仅供参考，不代表本人观点，也不对其真实性负责
 
+### API文档
+
+本项目已集成Swagger API文档，可以通过以下方式访问和使用：
+
+- **API文档地址**: [http://localhost:1234/api-docs](http://localhost:1234/api-docs)
+- **OpenAPI规范**: [http://localhost:1234/api/swagger](http://localhost:1234/api/swagger)
+
+#### 可用的API端点
+
+1. **POST /api/summary** - 文本内容总结
+   - 使用AI对输入的文本内容进行智能总结
+   
+2. **POST /api/mbti** - MBTI人格类型分析
+   - 基于用户发帖内容分析其MBTI人格类型特征
+   
+3. **POST /api/llm/chat** - AI聊天对话
+   - 与AI进行对话聊天
+
+所有API端点都在Swagger UI中提供了详细的文档说明、参数描述和示例，你可以直接在文档页面中进行API测试。
+
 ### 使用须知
 
 由于本项目是白嫖的Gemini1.5的api，存在调用速率以及调用次数限制
@@ -34,6 +54,7 @@
 - react-oidc-context
 - tailwind css
 - material UI
+- swagger-jsdoc & swagger-ui-react (API文档)
 - [commit规范](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ### 演示截图

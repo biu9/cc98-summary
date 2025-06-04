@@ -115,6 +115,65 @@ const assignDefaultMBTIResponseData = (data: IMBTIResponse): IMBTIResponse => {
   }
 }
 
+/**
+ * @swagger
+ * /api/mbti:
+ *   post:
+ *     tags:
+ *       - MBTI
+ *     summary: MBTI人格类型分析
+ *     description: 基于用户发帖内容分析其MBTI人格类型特征
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/IMBTIRequest'
+ *           example:
+ *             text: "用户的发帖内容文本..."
+ *             username: "张三"
+ *     responses:
+ *       200:
+ *         description: MBTI分析成功
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/IGeneralResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/IMBTIResponse'
+ *             example:
+ *               isOk: true
+ *               data:
+ *                 first:
+ *                   type: "E"
+ *                   explanation: "用户表现出外向特征..."
+ *                 second:
+ *                   type: "N"
+ *                   explanation: "用户倾向于直觉思维..."
+ *                 third:
+ *                   type: "F"
+ *                   explanation: "用户决策时更注重情感..."
+ *                 fourth:
+ *                   type: "P"
+ *                   explanation: "用户偏好灵活性..."
+ *                 potential:
+ *                   type: "ENFP"
+ *                   explanation: "综合分析用户可能是ENFP类型..."
+ *               msg: "success"
+ *       500:
+ *         description: 服务器内部错误
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/IGeneralResponse'
+ *             example:
+ *               isOk: false
+ *               data: ""
+ *               msg: "错误信息"
+ */
 export async function POST(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
   const { text, username } = await request.json() as IMBTIRequest;
 

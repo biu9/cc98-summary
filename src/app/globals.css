@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Swagger UI CSS */
+@import 'swagger-ui-react/swagger-ui.css';
+
 :root {
   --primary-color: #333;
   --secondary-color: #666;
