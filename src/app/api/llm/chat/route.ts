@@ -1,5 +1,5 @@
 import { generateText } from "ai";
-import { google } from "@ai-sdk/google";
+import { google } from "@/lib/models";
 import { NextRequest, NextResponse } from "next/server";
 import { withCors } from "@/lib/cors";
 
@@ -52,12 +52,17 @@ import { withCors } from "@/lib/cors";
  *         description: 预检请求成功
  */
 async function handler(request: NextRequest) {
-  const { messages } = await request.json();
-  const response = await generateText({
-    model: google("gemini-2.0-flash-exp"),
-    messages,
-  });
-  return NextResponse.json(response);
+  try {
+    const { messages } = await request.json();
+    const response = await generateText({
+      model: google("gemini-2.0-flash-exp"),
+      messages,
+    });
+    return NextResponse.json(response.text);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: error }, { status: 500 });
+  }
 }
 
 export const POST = withCors(handler);
