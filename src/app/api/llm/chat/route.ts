@@ -1,6 +1,6 @@
-import { generateText } from "ai";
+import { streamText } from "ai";
 import { google } from "@/lib/models";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { withCors } from "@/lib/cors";
 
 /**
@@ -10,7 +10,7 @@ import { withCors } from "@/lib/cors";
  *     tags:
  *       - Chat
  *     summary: AI聊天对话
- *     description: 与AI进行对话聊天
+ *     description: 与AI进行流式对话聊天
  *     requestBody:
  *       required: true
  *       content:
@@ -29,17 +29,12 @@ import { withCors } from "@/lib/cors";
  *                 content: "你好，请介绍一下自己"
  *     responses:
  *       200:
- *         description: 聊天响应成功
+ *         description: 聊天响应成功（流式）
  *         content:
- *           application/json:
+ *           text/plain:
  *             schema:
- *               type: object
- *               properties:
- *                 text:
- *                   type: string
- *                   description: AI生成的回复文本
- *             example:
- *               text: "你好！我是AI助手，很高兴为您服务。"
+ *               type: string
+ *               description: AI生成的流式回复文本
  *       500:
  *         description: 服务器内部错误
  *   options:
@@ -52,18 +47,15 @@ import { withCors } from "@/lib/cors";
  *         description: 预检请求成功
  */
 async function handler(request: NextRequest) {
-  try {
-    const { messages } = await request.json();
-    const response = await generateText({
-      model: google("gemini-2.0-flash-exp"),
-      messages,
-    });
-    return NextResponse.json(response.text);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: error }, { status: 500 });
-  }
+  const { messages } = await request.json();
+  
+  const result = await streamText({
+    model: google("gemini-2.0-flash-exp"),
+    messages,
+  });
+  
+  return result.toDataStreamResponse();
 }
 
 export const POST = withCors(handler);
-export const OPTIONS = withCors(async () => NextResponse.json({}));
+export const OPTIONS = withCors(async () => new Response(null, { status: 200 }));
