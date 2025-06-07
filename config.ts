@@ -9,7 +9,7 @@ const API_ROOT =
 const OPENID_ROOT =
   process.env.NODE_ENV === "development"
     ? "http://openid-cc98-org-s.webvpn.zju.edu.cn:8001"
-    : "https://www.cc98agent.top/";
+    : "https://openid.cc98.org";
 
 const CURRENT_ROOT =
   process.env.NODE_ENV === "development"
@@ -36,16 +36,19 @@ const OIDC_CONFIG: UserManagerSettings = {
   validateSubOnSilentRenew: true,
   includeIdTokenInSilentRenew: false,
   loadUserInfo: false,
-  // 👇 关键点：手动重写 endpoint，劫持原始配置
-  metadata: {
+};
+
+if (process.env.NODE_ENV === "development") {
+  OIDC_CONFIG.metadata = {
+    // 👇 关键点：手动重写 endpoint，劫持原始配置
     issuer: OPENID_ROOT,
     authorization_endpoint: `${OPENID_ROOT}/connect/authorize`,
     token_endpoint: `${OPENID_ROOT}/connect/token`,
     userinfo_endpoint: `${OPENID_ROOT}/connect/userinfo`,
     jwks_uri: `${OPENID_ROOT}/.well-known/openid-configuration/jwks`,
     end_session_endpoint: `${OPENID_ROOT}/connect/endsession`,
-  },
-};
+  };
+}
 
 export {
   API_ROOT,

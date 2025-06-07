@@ -70,9 +70,9 @@ async function handleRequest(
       
       // 添加查询参数
       const searchParams = request.nextUrl.searchParams;
-      for (const [key, value] of searchParams.entries()) {
+      searchParams.forEach((value, key) => {
         targetUrl.searchParams.append(key, value);
-      }
+      });
 
       console.log(`[Proxy] Trying ${attempt.name}: ${method} ${targetUrl.toString()}`);
 
