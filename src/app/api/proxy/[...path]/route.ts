@@ -1,24 +1,60 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 // WebVPN代理地址
 const WEBVPN_API_BASE = 'https://api-cc98-org-s.webvpn.zju.edu.cn:8001';
 // 备用HTTP地址（如果HTTPS失败）
 const WEBVPN_API_BASE_HTTP = 'http://api-cc98-org-s.webvpn.zju.edu.cn:8001';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  const { path } = req.query;
-  const { method = 'GET', headers, body } = req;
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  return handleRequest(request, params.path, 'GET');
+}
 
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  return handleRequest(request, params.path, 'POST');
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  return handleRequest(request, params.path, 'PUT');
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  return handleRequest(request, params.path, 'DELETE');
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { path: string[] } }
+) {
+  return handleRequest(request, params.path, 'PATCH');
+}
+
+async function handleRequest(
+  request: NextRequest,
+  path: string[],
+  method: string
+) {
   // 构建完整的API路径
-  const apiPath = Array.isArray(path) ? path.join('/') : path;
+  const apiPath = path.join('/');
   if (!apiPath) {
-    return res.status(400).json({ error: 'API path is required' });
+    return NextResponse.json({ error: 'API path is required' }, { status: 400 });
   }
 
   // 检查Authorization header
-  const authorization = headers.authorization;
+  const authorization = request.headers.get('authorization');
   if (!authorization) {
-    return res.status(401).json({ error: 'Authorization header is required' });
+    return NextResponse.json({ error: 'Authorization header is required' }, { status: 401 });
   }
 
   // 尝试不同的连接方式
@@ -33,13 +69,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const targetUrl = new URL(`/${apiPath}`, attempt.url);
       
       // 添加查询参数
-      const queryString = req.url?.split('?')[1];
-      if (queryString) {
-        // 移除Next.js的内部参数
-        const cleanQuery = queryString.replace(/&?path=[^&]*/g, '');
-        if (cleanQuery) {
-          targetUrl.search = cleanQuery;
-        }
+      const searchParams = request.nextUrl.searchParams;
+      for (const [key, value] of searchParams.entries()) {
+        targetUrl.searchParams.append(key, value);
       }
 
       console.log(`[Proxy] Trying ${attempt.name}: ${method} ${targetUrl.toString()}`);
@@ -52,20 +84,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
 
       // 处理Content-Type
-      if (headers['content-type']) {
-        requestHeaders['Content-Type'] = headers['content-type'] as string;
+      const contentType = request.headers.get('content-type');
+      if (contentType) {
+        requestHeaders['Content-Type'] = contentType;
       }
 
-      // 构建fetch选项，增加超时和错误处理
+      // 构建fetch选项
       const fetchOptions: RequestInit = {
-        method: method as string,
+        method,
         headers: requestHeaders,
-        // 添加超时设置（Node.js环境下需要使用AbortController）
       };
 
       // 添加请求体（如果有）
-      if (body && method !== 'GET' && method !== 'HEAD') {
-        fetchOptions.body = typeof body === 'string' ? body : JSON.stringify(body);
+      if (['POST', 'PUT', 'PATCH'].includes(method)) {
+        const body = await request.text();
+        if (body) {
+          fetchOptions.body = body;
+        }
       }
 
       // 创建超时控制器
@@ -77,18 +112,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const response = await fetch(targetUrl.toString(), fetchOptions);
       clearTimeout(timeoutId);
 
-      console.log('thy debug response', response);
+      console.log('response status:', response.status);
       
       // 获取响应数据
       const responseText = await response.text();
       let responseData;
 
-      console.log('thy debug responseText', responseText);
+      console.log('responseText length:', responseText.length);
       
       try {
         responseData = JSON.parse(responseText);
       } catch (error) {
-        console.log('thy debug error', error);
         // 检查是否是WebVPN登录重定向页面
         if (responseText.includes('webvpn.zju.edu.cn/portal') && responseText.includes('redirect_uri')) {
           const redirectMatch = responseText.match(/url:"([^"]*webvpn\.zju\.edu\.cn\/portal[^"]*)"/);
@@ -96,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           
           console.log(`[Proxy] WebVPN login required, redirect to: ${loginUrl}`);
           
-          return res.status(401).json({
+          return NextResponse.json({
             error: 'WebVPN login required',
             details: 'Please login to WebVPN first before using the API',
             loginUrl: loginUrl,
@@ -105,20 +139,24 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               '2. Login with your ZJU account credentials', 
               '3. After successful login, retry the API request'
             ]
-          });
+          }, { status: 401 });
         }
         
         responseData = responseText;
       }
 
       // 设置响应headers
-      res.setHeader('Content-Type', response.headers.get('content-type') || 'application/json');
+      const headers = new Headers();
+      headers.set('Content-Type', response.headers.get('content-type') || 'application/json');
       
       // 记录成功响应
       console.log(`[Proxy Success] ${attempt.name} ${response.status} ${response.statusText}`);
       
       // 返回响应
-      return res.status(response.status).json(responseData);
+      return NextResponse.json(responseData, { 
+        status: response.status,
+        headers
+      });
 
     } catch (error: unknown) {
       console.error(`[Proxy Error] ${attempt.name} failed:`, error);
@@ -133,7 +171,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         // 网络连接错误
         if (error.message.includes('fetch') || error.name === 'TypeError') {
           console.error('[Network Error] All connection attempts failed');
-          return res.status(503).json({ 
+          return NextResponse.json({ 
             error: 'Service unavailable',
             details: 'Unable to connect to WebVPN service using both HTTPS and HTTP. Please check the network or WebVPN service status.',
             debugInfo: process.env.NODE_ENV === 'development' ? {
@@ -142,36 +180,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               attemptsUsed: attempts.map(a => a.name),
               suggestion: 'Try accessing https://api-cc98-org-s.webvpn.zju.edu.cn:8001 in your browser first'
             } : undefined
-          });
+          }, { status: 503 });
         }
         
         // 超时错误
         if (error.name === 'AbortError') {
           console.error('[Timeout Error] Request timeout');
-          return res.status(408).json({
+          return NextResponse.json({
             error: 'Request timeout',
             details: 'The request to WebVPN service timed out. Please try again.'
-          });
+          }, { status: 408 });
         }
         
         // SSL/TLS错误
         if (error.message.includes('SSL') || error.message.includes('TLS') || error.message.includes('certificate')) {
           console.error('[SSL/TLS Error]', error.message);
-          return res.status(503).json({
+          return NextResponse.json({
             error: 'SSL/TLS connection error',
             details: 'Unable to establish secure connection to WebVPN service. This might be due to SSL/TLS protocol compatibility issues.',
             debugInfo: process.env.NODE_ENV === 'development' ? {
               message: error.message,
               suggestion: 'Try accessing the WebVPN service directly in your browser first, or use HTTP fallback'
             } : undefined
-          });
+          }, { status: 503 });
         }
       }
       
-      return res.status(500).json({ 
+      return NextResponse.json({ 
         error: 'Internal proxy error',
         details: process.env.NODE_ENV === 'development' ? (error as Error).message : 'An unexpected error occurred'
-      });
+      }, { status: 500 });
     }
   }
+
+  // 这个永远不会执行，但为了类型安全而返回
+  return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 } 

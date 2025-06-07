@@ -1,8 +1,8 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 
 const WEBVPN_API_BASE = 'https://api-cc98-org-s.webvpn.zju.edu.cn:8001';
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export async function GET() {
   const testResults = {
     timestamp: new Date().toISOString(),
     webvpnUrl: WEBVPN_API_BASE,
@@ -140,5 +140,5 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
   }
 
-  return res.status(200).json(testResults);
+  return NextResponse.json(testResults);
 } 
