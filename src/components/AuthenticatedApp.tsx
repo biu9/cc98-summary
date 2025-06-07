@@ -221,7 +221,7 @@ const AuthenticatedApp = ({
         }}
       >
         {/* WebVPN状态检查 */}
-        <WebVPNStatus />
+        {process.env.NODE_ENV === "development" && <WebVPNStatus />}
 
         {/* 功能介绍 - 移动端优化 */}
         <Paper
