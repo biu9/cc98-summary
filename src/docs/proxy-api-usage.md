@@ -23,7 +23,7 @@
 import { callCC98Api, getUserRecentTopics, getUserInfo } from '@/utils/apiProxy';
 
 // 获取用户最近话题
-const result = await getUserRecentTopics(accessToken, 0, 20);
+const result = await getUserRecentTopics(refreshToken, 0, 20);
 if (result.error) {
   console.error('API Error:', result.error);
 } else {
@@ -31,10 +31,10 @@ if (result.error) {
 }
 
 // 获取用户信息
-const userInfo = await getUserInfo(accessToken);
+const userInfo = await getUserInfo(refreshToken);
 
 // 通用API调用
-const customResult = await callCC98Api('me/favorite-board', accessToken);
+const customResult = await callCC98Api('me/favorite-board', refreshToken);
 ```
 
 ### 2. 使用更新后的GET/POST函数
@@ -43,10 +43,10 @@ const customResult = await callCC98Api('me/favorite-board', accessToken);
 import { GET, POST } from '@/request';
 
 // GET请求会自动转换为代理路径
-const topics = await GET('https://api.cc98.org/me/recent-topic?from=0&size=20', accessToken);
+const topics = await GET('https://api.cc98.org/me/recent-topic?from=0&size=20', refreshToken);
 
 // POST请求也会自动处理
-const result = await POST('/api/some-endpoint', data, accessToken);
+const result = await POST('/api/some-endpoint', data, refreshToken);
 ```
 
 ### 3. 直接调用代理API
@@ -54,7 +54,7 @@ const result = await POST('/api/some-endpoint', data, accessToken);
 ```typescript
 const response = await fetch('/api/proxy/me/recent-topic?from=0&size=20', {
   headers: {
-    'Authorization': `Bearer ${accessToken}`,
+    'Authorization': `Bearer ${refreshToken}`,
     'Content-Type': 'application/json',
   }
 });

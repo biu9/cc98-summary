@@ -31,23 +31,23 @@ export default function MBTI() {
 
   useEffect(() => {
     (async () => {
-      if(auth.user?.access_token) {
-        const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.access_token);
+      if(auth.user?.refresh_token) {
+        const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.refresh_token);
         setProfile(profile);
       }
     })();
-  }, [auth.user?.access_token]);
+  }, [auth.user?.refresh_token]);
 
   const handleClick = async () => {
     if(getCurrentCount() >= MAX_CALL_PER_USER) {
       setFeedback && setFeedback("今日测试次数已用完,请明日再试");
     }
     setLoading(true);
-    if(!auth.user?.access_token) {
-      setFeedback && setFeedback("access_token is not defined");
+    if(!auth.user?.refresh_token) {
+      setFeedback && setFeedback("refresh_token is not defined");
       return;
     }
-    const topicContent = await getTopicContent(auth.user?.access_token);
+    const topicContent = await getTopicContent(auth.user?.refresh_token);
     const res = await handleMBTI(`topic: ${topicContent}`, profile?.name || ''); // FIXME
     if (res.isOk) {
       setMBTI(res.data);

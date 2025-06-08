@@ -108,7 +108,7 @@ export default function Summary() {
       setFeedback && setFeedback("今日测试次数已用完,请明日再试");
     }
     setLoading(true);
-    const topicContent = await getTopic(auth.user?.access_token!, selectedTopic?.id, selectedTopic?.replyCount);
+    const topicContent = await getTopic(auth.user?.refresh_token!, selectedTopic?.id, selectedTopic?.replyCount);
     const res = await POST<ISummaryRequest, IGeneralResponse>("/api/summary", {
       text: generateQuestion(topicContent, question),
     });

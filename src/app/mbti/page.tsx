@@ -41,8 +41,8 @@ export default function MBTIPage() {
     const auth = useAuth();
     const { userInfo, loading: userInfoLoading, error: userInfoError } = useUserInfo();
     
-    // 使用useMemo来稳定access_token的引用
-    const accessToken = useMemo(() => auth.user?.access_token, [auth.user?.access_token]);
+    // 使用useMemo来稳定refresh_token的引用
+    const refreshToken = useMemo(() => auth.user?.refresh_token, [auth.user?.refresh_token]);
     
     // 监听userInfo错误
     useEffect(() => {
@@ -57,8 +57,8 @@ export default function MBTIPage() {
         return;
       }
       setLoading(true);
-      if(!accessToken) {
-        setFeedback("access_token is not defined");
+      if(!refreshToken) {
+        setFeedback("refresh_token is not defined");
         return;
       }
       if(!userInfo) {
@@ -68,7 +68,7 @@ export default function MBTIPage() {
       }
       
       try {
-        const topicContent = await getTopicContent(accessToken);
+        const topicContent = await getTopicContent(refreshToken);
         const res = await handleMBTI(`topic: ${topicContent}`, userInfo.name || '');
         if (res.isOk) {
           setMBTI(res.data);
