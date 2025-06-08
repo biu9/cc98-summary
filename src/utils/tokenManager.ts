@@ -72,7 +72,7 @@ export class TokenManager {
   public isTokenExpiringSoon(minutesBefore: number = 5): boolean {
     const expiresAt = this.auth.user?.expires_at;
     if (!expiresAt) return false;
-    
+
     const now = Math.floor(Date.now() / 1000);
     return (expiresAt - now) < (minutesBefore * 60);
   }
@@ -94,34 +94,34 @@ export const withTokenRefresh = async <T>(
   auth: any
 ): Promise<T> => {
   const tokenManager = TokenManager.getInstance(auth);
-  
+
   try {
     const token = await tokenManager.getValidAccessToken();
     if (!token) {
       throw new Error('无法获取有效的访问令牌');
     }
-    
+
     return await apiCall(token);
   } catch (error: any) {
     // 如果是401错误，尝试刷新token后重试
     if (error.message?.includes('401') || error.status === 401) {
       console.log('检测到401错误，尝试刷新token后重试...');
-      
+
       try {
         await auth.signinSilent();
         const newToken = await tokenManager.getValidAccessToken();
-        
+
         if (!newToken) {
           throw new Error('刷新token后仍无法获取有效令牌');
         }
-        
+
         return await apiCall(newToken);
       } catch (refreshError) {
         console.error('Token刷新失败:', refreshError);
         throw new Error('身份验证已过期，请重新登录');
       }
     }
-    
+
     throw error;
   }
 }; 
