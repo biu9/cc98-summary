@@ -11,7 +11,7 @@ import AuthenticatedApp from "@/components/AuthenticatedApp";
 
 export default function Home() {
   const [feedback, setFeedback] = useState<string>('');
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(false);
   const [currCount, setCurrCount] = useState(0);
 
   const setFeedbackFunc = (feedback: string) => {
