@@ -9,7 +9,7 @@ const Navigation: React.FC = () => {
           <Link href="/" className="text-xl font-medium text-gray-800 hover:text-blue-600 transition-colors">
             CC98 Hub
           </Link>
-          <div className="flex space-x-3">
+          <div className="flex items-center space-x-3">
             <Link href="/mbti" className="text-sm px-3 py-1 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
               MBTI测试
             </Link>

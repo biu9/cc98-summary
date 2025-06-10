@@ -5,4 +5,6 @@ export { default as ChatHeader } from './ChatHeader';
 export { default as ChatInput } from './ChatInput';
 export { default as LoadingIndicator } from './LoadingIndicator';
 export { default as Navigation } from './Navigation';
-export { default as SelectedTopics } from './SelectedTopics'; 
+export { default as SelectedTopics } from './SelectedTopics';
+export { KnowledgeBaseSidebar } from './KnowledgeBaseSidebar';
+export { KnowledgeBaseSelector } from './KnowledgeBaseSelector'; 
