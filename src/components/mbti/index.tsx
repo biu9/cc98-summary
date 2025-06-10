@@ -1,61 +1,37 @@
 "use client"
-import { useState, useContext, useEffect } from "react"
+import { useEffect } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Paper } from "@mui/material"
-import { FeedbackContext } from "@/store/feedBackContext"
-import { GET, POST } from "@/request"
-import { IGeneralResponse, IMBTIRequest, IMBTIResponse } from "@request/api"
 import { useAuth } from "react-oidc-context";
-import { getTopicContent } from "@/utils/getTopicContent";
-import { IUser } from "@cc98/api";
-import { API_ROOT, MAX_CALL_PER_USER } from "../../../config";
 import { MBTIResultCard } from "../mbti-result-card";
-import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
-
-const handleMBTI = async (text: string, username: string): Promise<IGeneralResponse> => {
-  const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
-    text,
-    username
-  });
-  return res;
-} 
+import { useMBTIStore } from "@/store/mbtiStore";
+import { useFeedback } from "@/store/globalStore";
 
 export default function MBTI() {
-  const feedbackContext = useContext(FeedbackContext);
-  const [mbti, setMBTI] = useState<IMBTIResponse | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState<IUser>();
-
-  const setFeedback = feedbackContext?.setFeedback;
+  const { setFeedback } = useFeedback();
+  const { 
+    mbti, 
+    loading, 
+    profile, 
+    fetchProfile, 
+    handleMBTITest 
+  } = useMBTIStore();
   const auth = useAuth();
 
+  // 获取用户资料
   useEffect(() => {
-    (async () => {
-      if(auth.user?.refresh_token) {
-        const profile = await GET<IUser>(`${API_ROOT}/me?sf_request_type=fetch`,auth.user?.refresh_token);
-        setProfile(profile);
-      }
-    })();
-  }, [auth.user?.refresh_token]);
+    if (auth.user?.refresh_token) {
+      fetchProfile(auth.user.refresh_token);
+    }
+  }, [auth.user?.refresh_token, fetchProfile]);
 
   const handleClick = async () => {
-    if(getCurrentCount() >= MAX_CALL_PER_USER) {
-      setFeedback && setFeedback("今日测试次数已用完,请明日再试");
-    }
-    setLoading(true);
-    if(!auth.user?.refresh_token) {
-      setFeedback && setFeedback("refresh_token is not defined");
+    if (!auth.user?.refresh_token) {
+      setFeedback("refresh_token is not defined");
       return;
     }
-    const topicContent = await getTopicContent(auth.user?.refresh_token);
-    const res = await handleMBTI(`topic: ${topicContent}`, profile?.name || ''); // FIXME
-    if (res.isOk) {
-      setMBTI(res.data);
-      increaseCurrentCount();
-    } else {
-      setFeedback && setFeedback(res.msg);
-    }
-    setLoading(false);
+    
+    await handleMBTITest(auth.user.refresh_token, setFeedback);
   }
 
   if (!mbti) {

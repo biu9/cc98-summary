@@ -1,86 +1,50 @@
 "use client"
-import { useState, useContext, useEffect, useMemo, useCallback } from "react"
+import { useEffect, useMemo } from "react"
 import LoadingButton from "@mui/lab/LoadingButton";
-import { Paper, Alert } from "@mui/material"
-import { FeedbackContext } from "@/store/feedBackContext"
-import { useUserInfo } from "@/store/userInfoContext"
-import { GET, POST } from "@/request"
-import { IGeneralResponse, IMBTIRequest, IMBTIResponse } from "@request/api"
+import { Alert } from "@mui/material"
 import { useAuth } from "react-oidc-context";
-import { getTopicContent } from "@/utils/getTopicContent";
-import { IUser } from "@cc98/api";
-import { API_ROOT, MAX_CALL_PER_USER, OIDC_CONFIG } from "../../../config";
 import { MBTIResultCard } from "@/components/mbti-result-card";
-import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
 import Link from "next/link";
 import { AuthProvider } from "react-oidc-context";
-import { UserInfoProvider } from "@/store/userInfoContext";
-
-const handleMBTI = async (text: string, username: string): Promise<IGeneralResponse> => {
-  const res = await POST<IMBTIRequest, IGeneralResponse>('/api/mbti', {
-    text,
-    username
-  });
-  return res;
-} 
+import { OIDC_CONFIG } from "../../../config";
+import { useFeedback, useUserInfo } from "@/store/globalStore";
+import { useMBTIStore } from "@/store/mbtiStore";
 
 export default function MBTIPage() {
-  const [feedback, setFeedback] = useState<string>('');
-  const [mbti, setMBTI] = useState<IMBTIResponse | undefined>(undefined);
-  const [loading, setLoading] = useState(false);
-
-  const clearFeedback = () => {
-    setFeedback('');
-  }
-
-  const setFeedbackFunc = (feedback: string) => {
-    setFeedback(feedback);
-  }
-
   const Content = () => {
     const auth = useAuth();
-    const { userInfo, loading: userInfoLoading, error: userInfoError } = useUserInfo();
+    const { feedback, setFeedback, clearFeedback } = useFeedback();
+    const { userInfo, loading: userInfoLoading, error: userInfoError, fetchUserInfo } = useUserInfo();
+    const { mbti, loading, handleMBTITest } = useMBTIStore();
     
     // 使用useMemo来稳定refresh_token的引用
     const refreshToken = useMemo(() => auth.user?.refresh_token, [auth.user?.refresh_token]);
+    
+    // 获取用户信息
+    useEffect(() => {
+      if (auth.isAuthenticated && refreshToken && !userInfo && !userInfoLoading) {
+        fetchUserInfo(refreshToken);
+      }
+    }, [auth.isAuthenticated, refreshToken, userInfo, userInfoLoading, fetchUserInfo]);
     
     // 监听userInfo错误
     useEffect(() => {
       if (userInfoError) {
         setFeedback(userInfoError);
       }
-    }, [userInfoError]);
+    }, [userInfoError, setFeedback]);
   
     const handleClick = async () => {
-      if(getCurrentCount() >= MAX_CALL_PER_USER) {
-        setFeedback("今日测试次数已用完,请明日再试");
-        return;
-      }
-      setLoading(true);
-      if(!refreshToken) {
+      if (!refreshToken) {
         setFeedback("refresh_token is not defined");
         return;
       }
-      if(!userInfo) {
+      if (!userInfo) {
         setFeedback("用户信息未加载完成，请稍后再试");
-        setLoading(false);
         return;
       }
       
-      try {
-        const topicContent = await getTopicContent(refreshToken);
-        const res = await handleMBTI(`topic: ${topicContent}`, userInfo.name || '');
-        if (res.isOk) {
-          setMBTI(res.data);
-          increaseCurrentCount();
-        } else {
-          setFeedback(res.msg);
-        }
-      } catch (error) {
-        console.error('MBTI test error:', error);
-        setFeedback("测试过程中发生错误，请重试");
-      }
-      setLoading(false);
+      await handleMBTITest(refreshToken, setFeedback);
     }
   
     if (!auth.isAuthenticated) {
@@ -159,11 +123,7 @@ export default function MBTIPage() {
 
   return (
     <AuthProvider {...OIDC_CONFIG}>
-      <UserInfoProvider>
-        <FeedbackContext.Provider value={{ feedback, setFeedback: setFeedbackFunc }}>
-          <Content />
-        </FeedbackContext.Provider>
-      </UserInfoProvider>
+      <Content />
     </AuthProvider>
   )
 } 

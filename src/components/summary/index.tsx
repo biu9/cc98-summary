@@ -1,8 +1,7 @@
 import { Paper, Input, Button, CircularProgress, Autocomplete, TextField } from "@mui/material";
-import { SetStateAction, useCallback, useContext, useEffect, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useState } from "react";
 import { IGeneralResponse, ISummaryRequest } from "@request/api";
 import { GET, POST } from "@/request";
-import { FeedbackContext } from "@/store/feedBackContext";
 import { debounce } from "@/utils/debounce";
 import { API_ROOT, MAX_CALL_PER_USER } from "../../../config";
 import { useAuth } from "react-oidc-context";
@@ -10,6 +9,7 @@ import { IPost, ITopic } from "@cc98/api";
 import { requestQueue } from "@/utils/requestQueue";
 import { securityFilter } from "@/utils/securityFilter";
 import { increaseCurrentCount, getCurrentCount } from "@/utils/limitation";
+import { useFeedback } from "@/store/globalStore";
 
 type ReferenceProps = {
   label: string;
@@ -75,9 +75,7 @@ export default function Summary() {
   const [selectedTopic, setSelectedTopic] = useState<ReferenceProps | null>(null);
 
   const auth = useAuth();
-
-  const feedbackContext = useContext(FeedbackContext);
-  const setFeedback = feedbackContext?.setFeedback;
+  const { setFeedback } = useFeedback();
 
   const getTopic = async(token: string, topicId?: number, replyCount?: number) => {
     if(!topicId || !replyCount)  return '';
@@ -105,7 +103,8 @@ export default function Summary() {
 
   const handleSubmit = async () => {
     if(getCurrentCount() >= MAX_CALL_PER_USER) {
-      setFeedback && setFeedback("今日测试次数已用完,请明日再试");
+      setFeedback("今日测试次数已用完,请明日再试");
+      return;
     }
     setLoading(true);
     const topicContent = await getTopic(auth.user?.refresh_token!, selectedTopic?.id, selectedTopic?.replyCount);
@@ -116,7 +115,7 @@ export default function Summary() {
       setSummary(res.data);
       increaseCurrentCount();
     } else {
-      setFeedback && setFeedback(res.msg);
+      setFeedback(res.msg);
     }
     setLoading(false);
   };

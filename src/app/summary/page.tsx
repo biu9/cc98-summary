@@ -1,12 +1,12 @@
 "use client"
 import { Alert } from "@mui/material";
 import { useEffect, useRef } from "react";
-import { FeedbackContext } from "@/store/feedBackContext";
+
 import { OIDC_CONFIG } from "../../../config";
 import { useAuth } from "react-oidc-context";
 import Link from "next/link";
 import { AuthProvider } from "react-oidc-context";
-import { UserInfoProvider } from "@/store/userInfoContext";
+
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
   Reference,
@@ -128,15 +128,9 @@ const SummaryPageContent: React.FC = () => {
 }
 
 export default function SummaryPage() {
-  const { feedback, clearFeedback } = useSummaryStore();
-
   return (
     <AuthProvider {...OIDC_CONFIG}>
-      <UserInfoProvider>
-        <FeedbackContext.Provider value={{ feedback, setFeedback: () => {} }}>
-          <SummaryPageContent />
-        </FeedbackContext.Provider>
-      </UserInfoProvider>
+      <SummaryPageContent />
     </AuthProvider>
   );
 } 

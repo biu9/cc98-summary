@@ -33,7 +33,7 @@ import {
 import { useAuth } from "react-oidc-context";
 import { useState } from "react";
 import WebVPNStatus from "./WebVPNStatus";
-import { useUserInfo } from "@/store/userInfoContext";
+import { useUserInfo } from "@/store/globalStore";
 
 interface AuthenticatedAppProps {
   showModal: boolean;
