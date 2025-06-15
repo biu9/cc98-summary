@@ -9,17 +9,14 @@ import { AuthProvider } from "react-oidc-context";
 
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
-  Reference,
   ChatMessages,
   ChatHeader,
   Navigation,
   SelectedTopics,
   ChatInput,
-  KnowledgeBaseSidebar,
   KnowledgeBaseSelector
 } from "./components";
 import { useSummaryStore } from "@/store/summaryStore";
-import { getFavouriteTopicGroup, getFavouriteTopicContent } from "@/utils/getFavouriteTopic";
 
 
 const SummaryPageContent: React.FC = () => {
@@ -43,23 +40,17 @@ const SummaryPageContent: React.FC = () => {
     loadKnowledgeBases
   } = useSummaryStore();
 
-  // 初始化知识库
+  // 初始化知识库（基于收藏帖子）
   useEffect(() => {
-    loadKnowledgeBases();
-  }, [loadKnowledgeBases]);
+    if (auth.user?.access_token) {
+      loadKnowledgeBases(auth.user.access_token);
+    }
+  }, [auth.user?.access_token, loadKnowledgeBases]);
 
   // 滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
-
-  useEffect(() => {
-    if (auth.user?.access_token) {
-      getFavouriteTopicGroup(auth.user.access_token).then(res => {
-        console.log(res);
-      });
-    }
-  }, [auth.user?.access_token]);
 
   const handleSubmit = async () => {
     if (auth.user?.access_token) {
@@ -86,9 +77,9 @@ const SummaryPageContent: React.FC = () => {
 
       <Navigation />
 
-      <div className="max-w-7xl mx-auto p-4 flex gap-4" style={{ minHeight: 'calc(100vh - 80px)' }}>
+      <div className="max-w-5xl mx-auto p-4" style={{ minHeight: 'calc(100vh - 80px)' }}>
         {/* 主聊天区域 */}
-        <div className="flex-1 chat-container flex flex-col" style={{ minWidth: 0 }}>
+        <div className="chat-container flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
           <ChatHeader />
 
           <ChatMessages
@@ -99,14 +90,6 @@ const SummaryPageContent: React.FC = () => {
 
           <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t">
             <KnowledgeBaseSelector />
-
-            <div className="mb-3">
-              <Reference
-                selectedTopics={selectedTopics}
-                setSelectedTopics={setSelectedTopics}
-                accessToken={auth.user?.access_token}
-              />
-            </div>
 
             <SelectedTopics
               selectedTopics={selectedTopics}
@@ -122,13 +105,6 @@ const SummaryPageContent: React.FC = () => {
               selectedTopics={selectedTopics}
             />
           </div>
-        </div>
-
-        {/* 知识库管理侧边栏 */}
-        <div className="w-80 flex-shrink-0">
-          <KnowledgeBaseSidebar
-            accessToken={auth.user?.access_token}
-          />
         </div>
       </div>
     </div>

@@ -34,14 +34,14 @@ export const KnowledgeBaseSelector: React.FC = () => {
   return (
     <Box sx={{ mb: 2 }}>
       <FormControl fullWidth size="small">
-        <InputLabel>选择知识库（可选）</InputLabel>
+        <InputLabel>选择收藏帖子知识库</InputLabel>
         <Select
           value={selectedKnowledgeBase?.id || ''}
-          label="选择知识库（可选）"
+          label="选择收藏帖子知识库"
           onChange={(e) => handleKnowledgeBaseChange(e.target.value)}
         >
           <MenuItem value="">
-            <em>不使用知识库 - 手动选择帖子</em>
+            <em>请选择一个知识库</em>
           </MenuItem>
           {knowledgeBases.map((kb) => (
             <MenuItem key={kb.id} value={kb.id}>
@@ -62,6 +62,12 @@ export const KnowledgeBaseSelector: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           已选择知识库：{selectedKnowledgeBase.name}
           {selectedKnowledgeBase.description && ` - ${selectedKnowledgeBase.description}`}
+        </Typography>
+      )}
+
+      {knowledgeBases.length === 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          正在加载收藏帖子知识库...
         </Typography>
       )}
     </Box>

@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { IChatMessage, IReferenceProps, IKnowledgeBase } from '@/app/summary/types';
-import { KnowledgeBaseManager } from '@/utils/knowledgeBaseManager';
 import { POST, GET } from '@/request';
 import { IGeneralResponse, ISummaryRequest } from '@request/api';
 import { getCurrentCount, increaseCurrentCount } from '@/utils/limitation';
@@ -9,7 +8,8 @@ import { MAX_CALL_PER_USER } from '../../config';
 import { requestQueue } from '@/utils/requestQueue';
 import { securityFilter } from '@/utils/securityFilter';
 import { API_ROOT } from '../../config';
-import { IPost } from '@cc98/api';
+import { IPost, ITopic, ITopicGroup } from '@cc98/api';
+import { getFavouriteTopicGroup, getFavouriteTopicContent, getAFavouriteTopicContent } from '@/utils/getFavouriteTopic';
 
 interface SummaryState {
   // 基础状态
@@ -19,7 +19,7 @@ interface SummaryState {
   selectedTopics: IReferenceProps[];
   messages: IChatMessage[];
   
-  // 知识库状态
+  // 知识库状态（只读）
   knowledgeBases: IKnowledgeBase[];
   selectedKnowledgeBase: IKnowledgeBase | null;
   
@@ -32,13 +32,10 @@ interface SummaryState {
   addMessage: (type: 'user' | 'bot' | 'system', content: string, topicTitles?: string[]) => void;
   clearMessages: () => void;
   
-  // 知识库操作
+  // 知识库操作（简化为只读）
   setKnowledgeBases: (kbs: IKnowledgeBase[] | ((prev: IKnowledgeBase[]) => IKnowledgeBase[])) => void;
   setSelectedKnowledgeBase: (kb: IKnowledgeBase | null) => void;
-  loadKnowledgeBases: () => void;
-  createKnowledgeBase: (name: string, description: string, topics: IReferenceProps[]) => Promise<boolean>;
-  updateKnowledgeBase: (kb: IKnowledgeBase) => Promise<boolean>;
-  deleteKnowledgeBase: (id: string) => Promise<boolean>;
+  loadKnowledgeBases: (accessToken: string) => Promise<void>;
   selectKnowledgeBase: (kb: IKnowledgeBase) => void;
   
   // 业务逻辑
@@ -86,11 +83,47 @@ const generateQuestion = (topicContent: string, question: string): string => {
   return `请根据给出的知识库回答对应的问题: 知识库${topicContent},问题: ${question}`;
 };
 
+// 将收藏帖子组转换为知识库
+const convertFavoriteGroupToKnowledgeBase = async (
+  group: ITopicGroup, 
+  accessToken: string
+): Promise<IKnowledgeBase> => {
+  try {
+    // 获取该收藏组下的帖子列表
+    const topics = await getAFavouriteTopicContent(group, accessToken);
+    
+    const knowledgeBaseTopics: IReferenceProps[] = topics.map(topic => ({
+      id: topic.id,
+      label: topic.title,
+      replyCount: topic.replyCount
+    }));
+
+    return {
+      id: `favorite_group_${group.id}`,
+      name: group.name,
+      description: `基于收藏帖子组"${group.name}"自动生成的知识库`,
+      topics: knowledgeBaseTopics,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  } catch (error) {
+    console.error(`转换收藏组 ${group.name} 失败:`, error);
+    return {
+      id: `favorite_group_${group.id}`,
+      name: group.name,
+      description: `基于收藏帖子组"${group.name}"自动生成的知识库（加载失败）`,
+      topics: [],
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  }
+};
+
 // 初始消息
 const initialMessage: IChatMessage = {
   id: '1',
   type: 'system',
-  content: '您好！我是CC98智能助手，可以帮您基于论坛帖子内容回答问题。您可以选择使用已保存的知识库，或手动选择帖子，然后输入您的问题。',
+  content: '您好！我是CC98智能助手，可以帮您基于收藏的帖子内容回答问题。系统已自动为您生成基于收藏帖子组的知识库，请选择知识库后输入您的问题。',
   timestamp: new Date()
 };
 
@@ -132,81 +165,37 @@ export const useSummaryStore = create<SummaryState>()(
         
         clearMessages: () => set({ messages: [initialMessage] }),
 
-        // 知识库操作
+        // 知识库操作（简化为只读）
         setKnowledgeBases: (kbs) => set((state) => ({
           knowledgeBases: typeof kbs === 'function' ? kbs(state.knowledgeBases) : kbs
         })),
         
         setSelectedKnowledgeBase: (kb) => set({ selectedKnowledgeBase: kb }),
         
-        loadKnowledgeBases: () => {
-          const kbs = KnowledgeBaseManager.getAll();
-          set({ knowledgeBases: kbs });
-        },
-        
-        createKnowledgeBase: async (name, description, topics) => {
-          const { knowledgeBases, setFeedback } = get();
-          
-          if (KnowledgeBaseManager.isNameExists(name)) {
-            setFeedback('知识库名称已存在');
-            return false;
-          }
-          
-          const newKB = KnowledgeBaseManager.create(name, description, topics);
-          const success = KnowledgeBaseManager.save(newKB);
-          
-          if (success) {
-            set({ knowledgeBases: [...knowledgeBases, newKB] });
-            setFeedback('知识库创建成功');
-            return true;
-          } else {
-            setFeedback('创建知识库失败');
-            return false;
-          }
-        },
-        
-        updateKnowledgeBase: async (updatedKB) => {
-          const { knowledgeBases, selectedKnowledgeBase, setFeedback, setSelectedTopics } = get();
-          
-          const success = KnowledgeBaseManager.save(updatedKB);
-          
-          if (success) {
-            const newKBs = knowledgeBases.map(kb => kb.id === updatedKB.id ? updatedKB : kb);
-            set({ knowledgeBases: newKBs });
+        loadKnowledgeBases: async (accessToken: string) => {
+          try {
+            const { setFeedback } = get();
             
-            // 如果当前选中的是这个知识库，更新选中状态
-            if (selectedKnowledgeBase?.id === updatedKB.id) {
-              set({ selectedKnowledgeBase: updatedKB });
-              setSelectedTopics(updatedKB.topics);
+            // 获取用户收藏帖子组
+            const favoriteGroups = await getFavouriteTopicGroup(accessToken);
+            
+            if (favoriteGroups.length === 0) {
+              setFeedback('您还没有收藏帖子组，请先在论坛中收藏一些帖子');
+              set({ knowledgeBases: [] });
+              return;
             }
-            
-            setFeedback('知识库更新成功');
-            return true;
-          } else {
-            setFeedback('更新知识库失败');
-            return false;
-          }
-        },
-        
-        deleteKnowledgeBase: async (id) => {
-          const { knowledgeBases, selectedKnowledgeBase, setFeedback } = get();
-          
-          const success = KnowledgeBaseManager.delete(id);
-          
-          if (success) {
-            const newKBs = knowledgeBases.filter(kb => kb.id !== id);
-            set({ knowledgeBases: newKBs });
-            
-            // 如果删除的是当前选中的知识库，清除选中状态
-            if (selectedKnowledgeBase?.id === id) {
-              set({ selectedKnowledgeBase: null, selectedTopics: [] });
-            }
-            
-            setFeedback('知识库删除成功');
-            return true;
-          } else {
-            setFeedback('删除知识库失败');
-            return false;
+
+            // 将收藏帖子组转换为知识库
+            const knowledgeBases = await Promise.all(
+              favoriteGroups.map(group => convertFavoriteGroupToKnowledgeBase(group, accessToken))
+            );
+
+            set({ knowledgeBases });
+            setFeedback(`已自动生成 ${knowledgeBases.length} 个基于收藏帖子的知识库`);
+          } catch (error) {
+            console.error('加载收藏帖子失败:', error);
+            get().setFeedback('加载收藏帖子失败，请检查网络连接');
+            set({ knowledgeBases: [] });
           }
         },
         
@@ -216,7 +205,7 @@ export const useSummaryStore = create<SummaryState>()(
             selectedKnowledgeBase: kb, 
             selectedTopics: kb.topics 
           });
-          setFeedback(`已切换到知识库: ${kb.name}`);
+          setFeedback(`已选择知识库: ${kb.name}`);
         },
 
         // 业务逻辑
@@ -247,7 +236,7 @@ export const useSummaryStore = create<SummaryState>()(
           }
 
           if (selectedTopics.length === 0) {
-            setFeedback("请先选择知识库或参考帖子");
+            setFeedback("请先选择知识库");
             return;
           }
 
@@ -302,7 +291,6 @@ export const useSummaryStore = create<SummaryState>()(
       {
         name: 'summary-store',
         partialize: (state) => ({
-          knowledgeBases: state.knowledgeBases,
           selectedKnowledgeBase: state.selectedKnowledgeBase
         })
       }

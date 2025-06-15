@@ -11,7 +11,7 @@ const ChatHeader: React.FC = () => {
         </Avatar>
         <div>
           <h2 className="font-medium text-white">CC98 智能助手</h2>
-          <p className="text-sm text-white opacity-80">基于帖子内容的智能问答</p>
+          <p className="text-sm text-white opacity-80">基于收藏帖子的智能问答</p>
         </div>
       </div>
     </div>
