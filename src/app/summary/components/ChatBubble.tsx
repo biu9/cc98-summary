@@ -5,6 +5,10 @@ import SmartToyIcon from "@mui/icons-material/SmartToy";
 import PersonIcon from "@mui/icons-material/Person";
 import { useState } from "react";
 import { IChatMessage } from "../types";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 
 interface ChatBubbleProps {
   message: IChatMessage;
@@ -89,8 +93,15 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message }) => {
               )}
             </div>
           )}
-          <div className="text-sm leading-relaxed whitespace-pre-wrap">
-            {message.content}
+          <div className={`text-sm leading-relaxed prose prose-sm max-w-none ${
+            isUser || isSystem ? 'prose-invert' : 'prose-slate'
+          }`}>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeHighlight, rehypeRaw]}
+            >
+              {message.content}
+            </ReactMarkdown>
           </div>
           <div className={`text-xs mt-2 opacity-70`}>
             {message.timestamp.toLocaleTimeString()}
