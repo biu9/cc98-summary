@@ -72,14 +72,14 @@ const SummaryPageContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+    <div className="h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col">
       {feedback && <Alert severity="error" onClose={clearFeedback} className="m-4">{feedback}</Alert>}
 
       <Navigation />
 
-      <div className="max-w-5xl mx-auto p-4" style={{ minHeight: 'calc(100vh - 80px)' }}>
+      <div className="flex-1 max-w-5xl mx-auto w-full p-4 flex flex-col">
         {/* 主聊天区域 */}
-        <div className="chat-container flex flex-col" style={{ height: 'calc(100vh - 120px)' }}>
+        <div className="chat-container flex flex-col flex-1">
           <ChatHeader />
 
           <ChatMessages
@@ -88,7 +88,7 @@ const SummaryPageContent: React.FC = () => {
             ref={messagesEndRef}
           />
 
-          <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t">
+          <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t flex-shrink-0">
             <KnowledgeBaseSelector />
 
             <SelectedTopics
