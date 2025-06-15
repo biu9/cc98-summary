@@ -6,4 +6,5 @@ export { default as LoadingIndicator } from './LoadingIndicator';
 export { default as ChatInput } from './ChatInput';
 export { default as Navigation } from './Navigation';
 
-export { KnowledgeBaseSelector } from './KnowledgeBaseSelector'; 
+export { KnowledgeBaseSelector } from './KnowledgeBaseSelector';
+export { KnowledgeBaseList } from './KnowledgeBaseList'; 

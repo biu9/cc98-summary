@@ -14,7 +14,7 @@ import {
   Navigation,
   SelectedTopics,
   ChatInput,
-  KnowledgeBaseSelector
+  KnowledgeBaseList
 } from "./components";
 import { useSummaryStore } from "@/store/summaryStore";
 
@@ -77,33 +77,44 @@ const SummaryPageContent: React.FC = () => {
 
       <Navigation />
 
-      <div className="flex-1 max-w-5xl mx-auto w-full p-4 flex flex-col">
-        {/* 主聊天区域 */}
-        <div className="chat-container flex flex-col flex-1">
-          <ChatHeader />
+      <div className="flex-1 flex overflow-hidden">
+        {/* 左侧知识库列表 - 桌面端 */}
+        <div className="hidden lg:block w-80 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto my-4 ml-4">
+          <KnowledgeBaseList />
+        </div>
 
-          <ChatMessages
-            messages={messages}
-            loading={loading}
-            ref={messagesEndRef}
-          />
+        {/* 右侧聊天区域 */}
+        <div className="flex-1 flex flex-col my-4 mr-4 ml-10">
+          {/* 移动端知识库列表 */}
+          <div className="lg:hidden bg-white border-b border-gray-200 max-h-48 overflow-y-auto mb-4">
+            <KnowledgeBaseList />
+          </div>
 
-          <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t flex-shrink-0">
-            <KnowledgeBaseSelector />
+          {/* 聊天容器 - 使用flex-1占满剩余空间 */}
+          <div className="chat-container flex flex-col flex-1">
+            <ChatHeader />
 
-            <SelectedTopics
-              selectedTopics={selectedTopics}
-              onRemoveTopic={removeTopic}
-              selectedKnowledgeBase={selectedKnowledgeBase}
-            />
-
-            <ChatInput
-              question={question}
-              setQuestion={setQuestion}
-              onSubmit={handleSubmit}
+            <ChatMessages
+              messages={messages}
               loading={loading}
-              selectedTopics={selectedTopics}
+              ref={messagesEndRef}
             />
+
+            <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t flex-shrink-0">
+              <SelectedTopics
+                selectedTopics={selectedTopics}
+                onRemoveTopic={removeTopic}
+                selectedKnowledgeBase={selectedKnowledgeBase}
+              />
+
+              <ChatInput
+                question={question}
+                setQuestion={setQuestion}
+                onSubmit={handleSubmit}
+                loading={loading}
+                selectedTopics={selectedTopics}
+              />
+            </div>
           </div>
         </div>
       </div>

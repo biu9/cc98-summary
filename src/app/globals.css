@@ -184,12 +184,6 @@ body {
   .chat-messages {
     padding: 1rem;
   }
-  
-  .message-bubble-user,
-  .message-bubble-bot,
-  .message-bubble-system {
-    max-width: 85%;
-  }
 }
 
 /* Loading Animation */
@@ -238,3 +232,24 @@ body {
   background-color: rgba(156, 163, 175, 0.7);
 }
 
+/* Text truncation utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
