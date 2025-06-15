@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import { streamText } from "ai";
 import { google } from "@/lib/models";
 import { NextRequest } from "next/server";
@@ -83,8 +84,8 @@ ${knowledgeBase}
   } catch (error) {
     console.error('Summary chat error:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }), 
-      { 
+      JSON.stringify({ error: 'Internal server error' }),
+      {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
       }
