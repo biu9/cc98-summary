@@ -39,7 +39,22 @@ export function useSummaryChat() {
       // 增加调用次数
       increaseCurrentCount();
       
-      // 不需要再手动添加到传统消息列表，因为StreamingChatMessages会显示AI消息
+      // 为AI响应消息添加参考帖子信息
+      const extendedMessage = {
+        ...message,
+        topicTitles: selectedTopics.map(topic => topic.label),
+        knowledgeBaseName: selectedKnowledgeBase?.name,
+      };
+      
+      // 更新消息列表以包含参考帖子信息
+      chat.setMessages(prevMessages => {
+        const newMessages = [...prevMessages];
+        const lastIndex = newMessages.length - 1;
+        if (lastIndex >= 0 && newMessages[lastIndex].id === message.id) {
+          newMessages[lastIndex] = extendedMessage;
+        }
+        return newMessages;
+      });
     },
     
     // 初始消息
@@ -72,11 +87,17 @@ export function useSummaryChat() {
 
     // 不需要添加用户消息到传统列表，因为AI SDK会管理消息历史
 
-    // 调用AI聊天
+    // 调用AI聊天，附加参考帖子信息
+    const topicTitles = selectedTopics.map(topic => topic.label);
+    const knowledgeBaseName = selectedKnowledgeBase?.name;
+    
     chat.append({
       role: 'user',
       content: userMessage,
-    });
+      // 将参考帖子信息存储在消息中
+      topicTitles,
+      knowledgeBaseName,
+    } as any);
   };
 
   // 清空聊天记录

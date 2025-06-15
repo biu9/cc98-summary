@@ -21,18 +21,27 @@ interface StreamingChatMessagesProps {
   loading: boolean;
 }
 
+// 扩展Message类型以包含参考帖子信息
+interface ExtendedMessage extends Message {
+  topicTitles?: string[];
+  knowledgeBaseName?: string;
+}
+
 const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
   const isUser = message.role === 'user';
   const [topicsExpanded, setTopicsExpanded] = useState(false);
-  const { selectedTopics, selectedKnowledgeBase } = useSummaryStore();
   
-  // 对于用户和AI消息，都显示当前选中的知识库帖子信息
-  const shouldShowTopics = selectedTopics && selectedTopics.length > 0;
+  // 从消息的annotations中获取存储的参考帖子信息
+  const extendedMessage = message as ExtendedMessage;
+  const topicTitles = extendedMessage.topicTitles || [];
+  const knowledgeBaseName = extendedMessage.knowledgeBaseName;
+  
+  const shouldShowTopics = topicTitles && topicTitles.length > 0;
   const TOPICS_DISPLAY_LIMIT = 5;
-  const hasMoreTopics = shouldShowTopics && selectedTopics.length > TOPICS_DISPLAY_LIMIT;
+  const hasMoreTopics = shouldShowTopics && topicTitles.length > TOPICS_DISPLAY_LIMIT;
   const displayTopics = topicsExpanded 
-    ? selectedTopics 
-    : selectedTopics?.slice(0, TOPICS_DISPLAY_LIMIT);
+    ? topicTitles 
+    : topicTitles?.slice(0, TOPICS_DISPLAY_LIMIT);
 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 chat-bubble`}>
@@ -54,7 +63,7 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
           {shouldShowTopics && (
             <div className="text-xs opacity-80 mb-2 p-2 bg-black bg-opacity-10 rounded-lg">
               <div className="flex items-center justify-between mb-1">
-                <span>📋 {isUser ? '选择的' : '参考'}帖子{selectedKnowledgeBase ? ` (来自知识库: ${selectedKnowledgeBase.name})` : ''}:</span>
+                <span>📋 {isUser ? '选择的' : '参考'}帖子{knowledgeBaseName ? ` (来自知识库: ${knowledgeBaseName})` : ''}:</span>
                 {hasMoreTopics && (
                   <Button
                     size="small"
@@ -72,7 +81,7 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
                       }
                     }}
                   >
-                    {topicsExpanded ? '收起' : `展开全部 (${selectedTopics.length})`}
+                    {topicsExpanded ? '收起' : `展开全部 (${topicTitles.length})`}
                   </Button>
                 )}
               </div>
@@ -82,9 +91,9 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
                 transition: 'max-height 0.3s ease-in-out'
               }}>
                 <ul className="mt-1 pl-2">
-                  {displayTopics?.map((topic, index) => (
+                  {displayTopics?.map((title, index) => (
                     <li key={index} className="text-xs mb-1">
-                      • {topic.label.length > 40 ? `${topic.label.substring(0, 40)}...` : topic.label}
+                      • {title.length > 40 ? `${title.substring(0, 40)}...` : title}
                     </li>
                   ))}
                 </ul>
@@ -92,7 +101,7 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
               {hasMoreTopics && !topicsExpanded && (
                 <div className="text-center mt-1 opacity-70">
                   <span className="text-xs">
-                    还有 {selectedTopics.length - TOPICS_DISPLAY_LIMIT} 个帖子...
+                    还有 {topicTitles.length - TOPICS_DISPLAY_LIMIT} 个帖子...
                   </span>
                 </div>
               )}

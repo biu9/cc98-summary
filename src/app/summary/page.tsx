@@ -76,7 +76,7 @@ const SummaryPageContent: React.FC = () => {
 
   return (
     <div className="h-screen bg-gradient-to-br from-blue-50 to-indigo-50 flex flex-col">
-      {feedback && <Alert severity="error" onClose={clearFeedback} className="m-4">{feedback}</Alert>}
+      {feedback && <Alert severity="info" onClose={clearFeedback} className="m-4">{feedback}</Alert>}
 
       <Navigation />
 
