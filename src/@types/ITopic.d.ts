@@ -87,4 +87,23 @@ declare module "@cc98/api" {
 
     isInternalOnly: boolean;
   }
+
+  export interface ITopicGroup {
+    /**
+     * 收藏夹 ID
+     */
+    id: number;
+    /**
+     * 创建时间
+     */
+    createTime: string;
+    /**
+     * 收藏夹内帖子数量
+     */
+    count: number;
+    /**
+     * 收藏夹名称
+     */
+    name: string;
+  }
 }

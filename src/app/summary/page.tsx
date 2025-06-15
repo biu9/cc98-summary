@@ -19,13 +19,13 @@ import {
   KnowledgeBaseSelector
 } from "./components";
 import { useSummaryStore } from "@/store/summaryStore";
-
+import { getFavouriteTopicGroup, getFavouriteTopicContent } from "@/utils/getFavouriteTopic";
 
 
 const SummaryPageContent: React.FC = () => {
   const auth = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // 使用 Zustand store
   const {
     feedback,
@@ -52,6 +52,14 @@ const SummaryPageContent: React.FC = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    if (auth.user?.access_token) {
+      getFavouriteTopicGroup(auth.user.access_token).then(res => {
+        console.log(res);
+      });
+    }
+  }, [auth.user?.access_token]);
 
   const handleSubmit = async () => {
     if (auth.user?.access_token) {
@@ -90,38 +98,38 @@ const SummaryPageContent: React.FC = () => {
           />
 
           <div className="chat-input-container rounded-b-xl p-4 shadow-lg border-t">
-                      <KnowledgeBaseSelector />
+            <KnowledgeBaseSelector />
 
-          <div className="mb-3">
-            <Reference
+            <div className="mb-3">
+              <Reference
+                selectedTopics={selectedTopics}
+                setSelectedTopics={setSelectedTopics}
+                accessToken={auth.user?.access_token}
+              />
+            </div>
+
+            <SelectedTopics
               selectedTopics={selectedTopics}
-              setSelectedTopics={setSelectedTopics}
-              accessToken={auth.user?.access_token}
+              onRemoveTopic={removeTopic}
+              selectedKnowledgeBase={selectedKnowledgeBase}
+            />
+
+            <ChatInput
+              question={question}
+              setQuestion={setQuestion}
+              onSubmit={handleSubmit}
+              loading={loading}
+              selectedTopics={selectedTopics}
             />
           </div>
+        </div>
 
-          <SelectedTopics
-            selectedTopics={selectedTopics}
-            onRemoveTopic={removeTopic}
-            selectedKnowledgeBase={selectedKnowledgeBase}
-          />
-
-          <ChatInput
-            question={question}
-            setQuestion={setQuestion}
-            onSubmit={handleSubmit}
-            loading={loading}
-            selectedTopics={selectedTopics}
+        {/* 知识库管理侧边栏 */}
+        <div className="w-80 flex-shrink-0">
+          <KnowledgeBaseSidebar
+            accessToken={auth.user?.access_token}
           />
         </div>
-      </div>
-
-      {/* 知识库管理侧边栏 */}
-      <div className="w-80 flex-shrink-0">
-        <KnowledgeBaseSidebar
-          accessToken={auth.user?.access_token}
-        />
-      </div>
       </div>
     </div>
   );
