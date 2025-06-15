@@ -10,6 +10,7 @@ import { securityFilter } from '@/utils/securityFilter';
 import { API_ROOT } from '../../config';
 import { IPost, ITopic, ITopicGroup } from '@cc98/api';
 import { getFavouriteTopicGroup, getFavouriteTopicContent, getAFavouriteTopicContent } from '@/utils/getFavouriteTopic';
+import type { Message } from 'ai';
 
 interface SummaryState {
   // 基础状态
@@ -22,6 +23,10 @@ interface SummaryState {
   // 知识库状态（只读）
   knowledgeBases: IKnowledgeBase[];
   selectedKnowledgeBase: IKnowledgeBase | null;
+  
+  // Vercel AI SDK相关状态
+  aiMessages: Message[];
+  knowledgeBaseContent: string;
   
   // 操作方法
   setFeedback: (feedback: string) => void;
@@ -41,6 +46,11 @@ interface SummaryState {
   // 业务逻辑
   removeTopic: (topicId: number) => void;
   submitQuestion: (accessToken: string) => Promise<void>;
+  
+  // Vercel AI SDK相关操作
+  setAiMessages: (messages: Message[]) => void;
+  setKnowledgeBaseContent: (content: string) => void;
+  getKnowledgeBaseForAI: (accessToken: string) => Promise<string>;
   
   // 重置状态
   reset: () => void;
@@ -98,23 +108,25 @@ const convertFavoriteGroupToKnowledgeBase = async (
       replyCount: topic.replyCount
     }));
 
+    const now = new Date();
     return {
       id: `favorite_group_${group.id}`,
       name: group.name,
       description: `基于收藏帖子组"${group.name}"自动生成的知识库`,
       topics: knowledgeBaseTopics,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: now,
+      updatedAt: now
     };
   } catch (error) {
     console.error(`转换收藏组 ${group.name} 失败:`, error);
+    const errorNow = new Date();
     return {
       id: `favorite_group_${group.id}`,
       name: group.name,
       description: `基于收藏帖子组"${group.name}"自动生成的知识库（加载失败）`,
       topics: [],
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: errorNow,
+      updatedAt: errorNow
     };
   }
 };
@@ -139,6 +151,10 @@ export const useSummaryStore = create<SummaryState>()(
         messages: [initialMessage],
         knowledgeBases: [],
         selectedKnowledgeBase: null,
+        
+        // Vercel AI SDK相关状态
+        aiMessages: [],
+        knowledgeBaseContent: '',
 
         // 基础操作
         setFeedback: (feedback: string) => set({ feedback }),
@@ -278,6 +294,25 @@ export const useSummaryStore = create<SummaryState>()(
           setLoading(false);
         },
 
+        // Vercel AI SDK相关操作
+        setAiMessages: (messages) => set({ aiMessages: messages }),
+        
+        setKnowledgeBaseContent: (content) => set({ knowledgeBaseContent: content }),
+        
+        getKnowledgeBaseForAI: async (accessToken) => {
+          const { selectedTopics } = get();
+          if (selectedTopics.length === 0) return '';
+          
+          try {
+            const content = await getMultipleTopics(accessToken, selectedTopics);
+            get().setKnowledgeBaseContent(content);
+            return content;
+          } catch (error) {
+            console.error('获取知识库内容失败:', error);
+            return '';
+          }
+        },
+
         // 重置状态
         reset: () => set({
           feedback: '',
@@ -285,7 +320,9 @@ export const useSummaryStore = create<SummaryState>()(
           loading: false,
           selectedTopics: [],
           messages: [initialMessage],
-          selectedKnowledgeBase: null
+          selectedKnowledgeBase: null,
+          aiMessages: [],
+          knowledgeBaseContent: ''
         })
       }),
       {

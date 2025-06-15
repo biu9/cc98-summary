@@ -9,14 +9,15 @@ import { AuthProvider } from "react-oidc-context";
 
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
-  ChatMessages,
   ChatHeader,
   Navigation,
   SelectedTopics,
   ChatInput,
   KnowledgeBaseList
 } from "./components";
+import StreamingChatMessages from "./components/StreamingChatMessages";
 import { useSummaryStore } from "@/store/summaryStore";
+import { useSummaryChat } from "@/hooks/useSummaryChat";
 
 
 const SummaryPageContent: React.FC = () => {
@@ -27,7 +28,6 @@ const SummaryPageContent: React.FC = () => {
   const {
     feedback,
     question,
-    loading,
     selectedTopics,
     messages,
     knowledgeBases,
@@ -36,9 +36,11 @@ const SummaryPageContent: React.FC = () => {
     setSelectedTopics,
     clearFeedback,
     removeTopic,
-    submitQuestion,
     loadKnowledgeBases
   } = useSummaryStore();
+
+  // 使用AI聊天hook
+  const { handleSubmit: handleAISubmit, isAILoading, aiMessages } = useSummaryChat();
 
   // 初始化知识库（基于收藏帖子）
   useEffect(() => {
@@ -50,11 +52,12 @@ const SummaryPageContent: React.FC = () => {
   // 滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading]);
+  }, [messages, isAILoading]);
 
   const handleSubmit = async () => {
-    if (auth.user?.access_token) {
-      await submitQuestion(auth.user.access_token);
+    if (question.trim()) {
+      await handleAISubmit(question);
+      setQuestion(''); // 清空输入框
     }
   };
 
@@ -94,9 +97,10 @@ const SummaryPageContent: React.FC = () => {
           <div className="chat-container flex flex-col flex-1">
             <ChatHeader />
 
-            <ChatMessages
+            <StreamingChatMessages
               messages={messages}
-              loading={loading}
+              aiMessages={aiMessages}
+              loading={isAILoading}
               ref={messagesEndRef}
             />
 
@@ -111,7 +115,7 @@ const SummaryPageContent: React.FC = () => {
                 question={question}
                 setQuestion={setQuestion}
                 onSubmit={handleSubmit}
-                loading={loading}
+                loading={isAILoading}
                 selectedTopics={selectedTopics}
               />
             </div>

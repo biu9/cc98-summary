@@ -147,7 +147,7 @@ export const KnowledgeBaseList: React.FC = () => {
                 />
                 
                 <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
-                  {kb.updatedAt.toLocaleDateString('zh-CN')}
+                  {new Date(kb.updatedAt).toLocaleDateString('zh-CN')}
                 </Typography>
               </Box>
             </CardContent>
