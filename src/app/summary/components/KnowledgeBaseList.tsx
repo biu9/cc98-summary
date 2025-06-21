@@ -1,29 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
   Typography,
   Box,
   Chip,
-  Button
+  Button,
+  CircularProgress
 } from '@mui/material';
 import {
   Folder as FolderIcon,
   CheckCircle as CheckCircleIcon,
-  Article as ArticleIcon
+  Article as ArticleIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useSummaryStore } from '@/store/summaryStore';
 import { IKnowledgeBase } from '../types';
+import { useAuth } from 'react-oidc-context';
 
 export const KnowledgeBaseList: React.FC = () => {
+  const auth = useAuth();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
   const { 
     knowledgeBases, 
     selectedKnowledgeBase, 
-    selectKnowledgeBase 
+    selectKnowledgeBase,
+    loadKnowledgeBases,
+    setFeedback
   } = useSummaryStore();
 
   const handleSelectKnowledgeBase = (kb: IKnowledgeBase) => {
     selectKnowledgeBase(kb);
+  };
+
+  const handleRefreshKnowledgeBases = async () => {
+    if (!auth.user?.access_token) {
+      setFeedback('未找到访问令牌，请重新登录');
+      return;
+    }
+
+    setIsRefreshing(true);
+    try {
+      await loadKnowledgeBases(auth.user.access_token);
+      setFeedback('知识库已重新加载');
+    } catch (error) {
+      console.error('重新加载知识库失败:', error);
+      setFeedback('重新加载知识库失败，请稍后重试');
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   if (knowledgeBases.length === 0) {
@@ -34,9 +60,25 @@ export const KnowledgeBaseList: React.FC = () => {
           <Typography variant="h6" color="text.secondary" gutterBottom>
             暂无知识库
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
             正在加载您的收藏帖子知识库...
           </Typography>
+          <Button
+            variant="outlined"
+            startIcon={isRefreshing ? <CircularProgress size={16} /> : <RefreshIcon />}
+            onClick={handleRefreshKnowledgeBases}
+            disabled={isRefreshing}
+            sx={{
+              borderColor: '#667eea',
+              color: '#667eea',
+              '&:hover': {
+                borderColor: '#5a6fd8',
+                backgroundColor: 'rgba(102, 126, 234, 0.04)'
+              }
+            }}
+          >
+            {isRefreshing ? '刷新中...' : '重新获取'}
+          </Button>
         </Card>
       </Box>
     );
@@ -46,9 +88,36 @@ export const KnowledgeBaseList: React.FC = () => {
     <Box className="h-full">
       {/* 标题栏 */}
       <Box className="sticky top-0 bg-white border-b border-gray-100 p-4 z-10">
-        <Typography variant="h6" className="font-medium text-gray-800">
-          📚 收藏知识库
-        </Typography>
+        <Box className="flex items-center justify-between mb-2">
+          <Typography variant="h6" className="font-medium text-gray-800">
+            📚 收藏知识库
+          </Typography>
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={isRefreshing ? <CircularProgress size={14} /> : <RefreshIcon />}
+            onClick={handleRefreshKnowledgeBases}
+            disabled={isRefreshing}
+            sx={{
+              minWidth: 'auto',
+              px: 1.5,
+              py: 0.5,
+              borderColor: '#667eea',
+              color: '#667eea',
+              fontSize: '0.75rem',
+              '&:hover': {
+                borderColor: '#5a6fd8',
+                backgroundColor: 'rgba(102, 126, 234, 0.04)'
+              },
+              '&:disabled': {
+                borderColor: '#e5e7eb',
+                color: '#9ca3af'
+              }
+            }}
+          >
+            {isRefreshing ? '刷新中' : '刷新'}
+          </Button>
+        </Box>
         <Typography variant="body2" color="text.secondary" className="mt-1">
           选择知识库开始对话
         </Typography>
