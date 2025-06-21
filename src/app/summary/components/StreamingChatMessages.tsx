@@ -117,7 +117,7 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
             </ReactMarkdown>
           </div>
           <div className={`text-xs mt-2 opacity-70`}>
-            {new Date().toLocaleTimeString()}
+            {message.createdAt ? new Date(message.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString()}
           </div>
         </div>
       </div>
