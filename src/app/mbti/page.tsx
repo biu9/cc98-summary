@@ -5,8 +5,6 @@ import { Alert } from "@mui/material"
 import { useAuth } from "react-oidc-context";
 import { MBTIResultCard } from "@/components/mbti-result-card";
 import Link from "next/link";
-import { AuthProvider } from "react-oidc-context";
-import { OIDC_CONFIG } from "../../../config";
 import { useFeedback, useUserInfo } from "@/store/globalStore";
 import { useMBTIStore } from "@/store/mbtiStore";
 
@@ -47,12 +45,22 @@ export default function MBTIPage() {
       await handleMBTITest(refreshToken, setFeedback);
     }
   
+    if (auth.isLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="elegant-card p-8 text-center">
+            <p className="mb-4">正在验证登录状态…</p>
+          </div>
+        </div>
+      );
+    }
+
     if (!auth.isAuthenticated) {
       return (
         <div className="min-h-screen flex items-center justify-center">
           <div className="elegant-card p-8 text-center">
             <p className="mb-4">请先登录以使用MBTI测试功能</p>
-            <Link href="/" className="elegant-button">返回登录</Link>
+            <Link href="/" className="elegant-button">返回首页登录</Link>
           </div>
         </div>
       )
@@ -121,9 +129,5 @@ export default function MBTIPage() {
     )
   }
 
-  return (
-    <AuthProvider {...OIDC_CONFIG}>
-      <Content />
-    </AuthProvider>
-  )
+  return <Content />;
 } 

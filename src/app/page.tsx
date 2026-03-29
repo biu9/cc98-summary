@@ -1,8 +1,7 @@
 "use client";
 import { Alert } from "@mui/material";
 import { useEffect, useState } from "react";
-import { AuthProvider, useAuth } from "react-oidc-context";
-import { OIDC_CONFIG } from "../../config";
+import { useAuth } from "react-oidc-context";
 import { getCurrentCount } from "@/utils/limitation";
 import UnauthenticatedApp from "@/components/UnauthenticatedApp";
 import AuthenticatedApp from "@/components/AuthenticatedApp";
@@ -18,9 +17,7 @@ export default function Home() {
   },[])
 
   return (
-    <AuthProvider {...OIDC_CONFIG}>
-      <Content showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
-    </AuthProvider>
+    <Content showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
   )
 }
 
@@ -44,14 +41,29 @@ const App = ({ showModal, setShowModal, currCount }: {
   setShowModal: (show: boolean) => void,
   currCount: number
 }) => {
-  const auth = useAuth()
+  const auth = useAuth();
 
-  // if(process.env.NODE_ENV === "development") {
-  //   return <AuthenticatedApp showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
-  // }
-
-  if(auth.isAuthenticated) {
-    return <AuthenticatedApp showModal={showModal} setShowModal={setShowModal} currCount={currCount} />
+  if (auth.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <p className="text-gray-600">登录处理中…</p>
+      </div>
+    );
   }
-  return <UnauthenticatedApp />
-}
+
+  if (auth.error) {
+    return (
+      <>
+        <Alert severity="error" className="m-4">
+          登录失败：{auth.error.message}
+        </Alert>
+        <UnauthenticatedApp />
+      </>
+    );
+  }
+
+  if (auth.isAuthenticated) {
+    return <AuthenticatedApp showModal={showModal} setShowModal={setShowModal} currCount={currCount} />;
+  }
+  return <UnauthenticatedApp />;
+};

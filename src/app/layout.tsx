@@ -1,7 +1,8 @@
 import './globals.css'
-import { Inter, Poppins } from 'next/font/google'
+import { Poppins } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { OidcAuthProvider } from '@/components/OidcAuthProvider'
 
 const poppins = Poppins({ 
   weight: ['200', '300', '400', '500', '600'],
@@ -22,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body className={poppins.className}>
-        {children}
+        <OidcAuthProvider>{children}</OidcAuthProvider>
         <Analytics />
         <SpeedInsights />
       </body>

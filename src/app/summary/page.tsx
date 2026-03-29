@@ -2,10 +2,8 @@
 import { Alert } from "@mui/material";
 import { useEffect, useRef } from "react";
 
-import { OIDC_CONFIG } from "../../../config";
 import { useAuth } from "react-oidc-context";
 import Link from "next/link";
-import { AuthProvider } from "react-oidc-context";
 
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import {
@@ -61,14 +59,26 @@ const SummaryPageContent: React.FC = () => {
     }
   };
 
+  if (auth.isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
+        <div className="elegant-card p-8 text-center max-w-md">
+          <SmartToyIcon sx={{ fontSize: 48, color: '#4a90e2', mb: 2 }} />
+          <h2 className="text-xl font-medium mb-4">CC98 智能助手</h2>
+          <p className="text-gray-600 mb-6">正在验证登录状态…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!auth.isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
         <div className="elegant-card p-8 text-center max-w-md">
           <SmartToyIcon sx={{ fontSize: 48, color: '#4a90e2', mb: 2 }} />
           <h2 className="text-xl font-medium mb-4">CC98 智能助手</h2>
-          <p className="text-gray-600 mb-6">登录中，长时间没有跳转可点击重新登录...</p>
-          <Link href="/" className="elegant-button">返回登录</Link>
+          <p className="text-gray-600 mb-6">请先登录后再使用本功能。</p>
+          <Link href="/" className="elegant-button">返回首页登录</Link>
         </div>
       </div>
     )
@@ -127,9 +137,5 @@ const SummaryPageContent: React.FC = () => {
 }
 
 export default function SummaryPage() {
-  return (
-    <AuthProvider {...OIDC_CONFIG}>
-      <SummaryPageContent />
-    </AuthProvider>
-  );
+  return <SummaryPageContent />;
 } 

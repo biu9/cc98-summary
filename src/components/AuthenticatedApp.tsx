@@ -32,7 +32,6 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "react-oidc-context";
 import { useState } from "react";
-import WebVPNStatus from "./WebVPNStatus";
 import { useUserInfo } from "@/store/globalStore";
 
 interface AuthenticatedAppProps {
@@ -220,9 +219,6 @@ const AuthenticatedApp = ({
           px: { xs: 2, sm: 3, md: 4 },
         }}
       >
-        {/* WebVPN状态检查 */}
-        {process.env.NODE_ENV === "development" && <WebVPNStatus />}
-
         {/* 功能介绍 - 移动端优化 */}
         <Paper
           elevation={1}

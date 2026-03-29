@@ -1,4 +1,5 @@
-// API代理工具函数
+import { API_ROOT } from "../../config";
+
 interface ApiProxyOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   body?: any;
@@ -12,7 +13,7 @@ interface ApiResponse<T = any> {
 }
 
 /**
- * 通过代理API调用CC98接口
+ * 调用CC98接口
  * @param path API路径，例如 'me/recent-topic'
  * @param accessToken 访问令牌
  * @param options 请求选项
@@ -23,11 +24,11 @@ export async function callCC98Api<T = any>(
   options: ApiProxyOptions = {}
 ): Promise<ApiResponse<T>> {
   const { method = 'GET', body, headers = {} } = options;
-  
+
   try {
-    // 构建代理URL
-    const proxyUrl = `/api/proxy/${path}`;
-    
+    // 构建完整的API URL
+    const apiUrl = `${API_ROOT}/${path}`;
+
     // 准备请求选项
     const fetchOptions: RequestInit = {
       method,
@@ -37,26 +38,26 @@ export async function callCC98Api<T = any>(
         ...headers,
       },
     };
-    
+
     // 添加请求体
     if (body && method !== 'GET') {
       fetchOptions.body = JSON.stringify(body);
     }
-    
-    const response = await fetch(proxyUrl, fetchOptions);
+
+    const response = await fetch(apiUrl, fetchOptions);
     const data = await response.json();
-    
+
     if (!response.ok) {
       return {
         error: data.error || 'API request failed',
         details: data.details,
       };
     }
-    
+
     return { data };
-    
+
   } catch (error) {
-    console.error('[API Proxy Error]:', error);
+    console.error('[API Error]:', error);
     return {
       error: 'Network error',
       details: error instanceof Error ? error.message : 'Unknown error',

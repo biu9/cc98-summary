@@ -1,26 +1,21 @@
-# API迁移通知
+# API架构说明
 
-## 从Pages Router迁移到App Router
+本项目使用 Next.js App Router 架构。
 
-我们已将所有API端点从Pages Router迁移到App Router。这是Next.js推荐的最新架构。
+## API端点
 
-### 迁移内容
+可用的API端点：
 
-以下API已迁移：
+1. `/api/summary` - 文本内容总结
+2. `/api/mbti` - MBTI人格类型分析
+3. `/api/llm/chat` - AI聊天对话
 
-1. `/api/test-webvpn` - WebVPN连接测试API
-2. `/api/proxy/[...path]` - CC98 API代理
+## 技术细节
 
-### 客户端代码变更
+- 使用`app/api`目录结构
+- 使用`NextRequest/NextResponse`处理请求响应
+- 导出HTTP方法函数（GET、POST等）
 
-好消息是，所有API路径保持不变，因此客户端代码不需要任何修改。现有的代码将继续正常工作。
+## 联系我们
 
-### 技术细节
-
-- 从`pages/api`目录迁移到`app/api`目录
-- 从`NextApiRequest/NextApiResponse`迁移到`NextRequest/NextResponse`
-- 从导出默认处理程序迁移到导出HTTP方法函数（GET、POST等）
-
-### 联系我们
-
-如果您在API迁移后遇到任何问题，请联系我们。 
+如果您遇到任何问题，请联系我们。 
