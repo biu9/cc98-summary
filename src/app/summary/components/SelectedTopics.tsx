@@ -1,8 +1,8 @@
-"use client"
-import { Chip, Box, Typography, Button, Collapse } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
+﻿"use client";
+
 import { useState } from "react";
-import { IReferenceProps, IKnowledgeBase } from "../types";
+import { ExpandLessRounded, ExpandMoreRounded } from "@mui/icons-material";
+import { IKnowledgeBase, IReferenceProps } from "../types";
 
 interface SelectedTopicsProps {
   selectedTopics: IReferenceProps[];
@@ -10,102 +10,73 @@ interface SelectedTopicsProps {
   selectedKnowledgeBase?: IKnowledgeBase | null;
 }
 
-const SelectedTopics: React.FC<SelectedTopicsProps> = ({ selectedTopics, onRemoveTopic, selectedKnowledgeBase }) => {
+const DISPLAY_LIMIT = 8;
+
+export default function SelectedTopics({
+  selectedTopics,
+  onRemoveTopic,
+  selectedKnowledgeBase,
+}: SelectedTopicsProps) {
   const [expanded, setExpanded] = useState(false);
-  
+
   if (selectedTopics.length === 0) {
     return null;
   }
 
-  const isFromKnowledgeBase = selectedKnowledgeBase !== null;
-  
-  // 当帖子数量超过10个时，默认只显示前10个
-  const DISPLAY_LIMIT = 10;
+  const displayTopics = expanded
+    ? selectedTopics
+    : selectedTopics.slice(0, DISPLAY_LIMIT);
   const hasMore = selectedTopics.length > DISPLAY_LIMIT;
-  const displayTopics = expanded ? selectedTopics : selectedTopics.slice(0, DISPLAY_LIMIT);
-
-  // 截取标题，避免过长
-  const truncateTitle = (title: string, maxLength: number = 25) => {
-    return title.length > maxLength ? title.substring(0, maxLength) + '...' : title;
-  };
 
   return (
-    <Box className="mb-3">
-      <div className="flex items-center justify-between mb-2">
-        <div className="text-xs text-gray-600">
-          {isFromKnowledgeBase 
-            ? `收藏知识库"${selectedKnowledgeBase?.name}"中的帖子 (${selectedTopics.length}):`
-            : `当前选择的帖子 (${selectedTopics.length}):`
-          }
+    <div className="mb-4 rounded-[12px] border border-black/5 bg-white/80 px-4 py-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-semibold text-slate-900">
+            {selectedKnowledgeBase
+              ? `当前知识库：${selectedKnowledgeBase.name}`
+              : "当前参考帖子"}
+          </div>
+          <p className="mt-1 text-xs leading-6 text-slate-500">
+            已选择 {selectedTopics.length} 个帖子作为当前回答上下文。
+          </p>
         </div>
         {hasMore && (
-          <Button
-            size="small"
-            variant="text"
-            onClick={() => setExpanded(!expanded)}
-            startIcon={expanded ? <ExpandLess /> : <ExpandMore />}
-            sx={{ 
-              fontSize: '0.75rem',
-              minWidth: 'auto',
-              padding: '2px 8px',
-              color: 'text.secondary'
-            }}
+          <button
+            type="button"
+            onClick={() => setExpanded((value) => !value)}
+            className="pill text-xs"
           >
-            {expanded ? '收起' : `展开全部 (${selectedTopics.length})`}
-          </Button>
+            {expanded ? (
+              <>
+                <ExpandLessRounded className="text-[1rem]" />
+                收起
+              </>
+            ) : (
+              <>
+                <ExpandMoreRounded className="text-[1rem]" />
+                展开全部
+              </>
+            )}
+          </button>
         )}
       </div>
-      
-      {isFromKnowledgeBase && selectedKnowledgeBase?.description && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-          {selectedKnowledgeBase.description}
-        </Typography>
-      )}
-      
-      <Box sx={{ 
-        maxHeight: expanded ? 'none' : '120px',
-        overflow: 'hidden',
-        transition: 'max-height 0.3s ease-in-out'
-      }}>
-        <div className="flex flex-wrap gap-1">
-          {displayTopics.map((topic) => (
-            <Chip
-              key={topic.id}
-              label={`${truncateTitle(topic.label)} (${topic.replyCount})`}
-              onDelete={() => onRemoveTopic(topic.id)}
-              size="small"
-              sx={{
-                backgroundColor: isFromKnowledgeBase ? '#fff3e0' : '#e3f2fd',
-                color: isFromKnowledgeBase ? '#f57c00' : '#1565c0',
-                fontSize: '0.7rem',
-                height: '24px',
-                maxWidth: '200px',
-                '& .MuiChip-label': {
-                  paddingX: '6px',
-                  fontSize: '0.7rem'
-                },
-                '& .MuiChip-deleteIcon': {
-                  fontSize: '14px',
-                  color: isFromKnowledgeBase ? '#f57c00' : '#1565c0',
-                  '&:hover': {
-                    color: '#d32f2f'
-                  }
-                }
-              }}
-            />
-          ))}
-        </div>
-      </Box>
-      
-      {hasMore && !expanded && (
-        <Box sx={{ mt: 1, textAlign: 'center' }}>
-          <Typography variant="caption" color="text.secondary">
-            还有 {selectedTopics.length - DISPLAY_LIMIT} 个帖子...
-          </Typography>
-        </Box>
-      )}
-    </Box>
-  );
-};
 
-export default SelectedTopics; 
+      <div className="mt-4 flex flex-wrap gap-2">
+        {displayTopics.map((topic) => (
+          <button
+            key={topic.id}
+            type="button"
+            onClick={() => onRemoveTopic(topic.id)}
+            className="inline-flex max-w-full items-center gap-2 rounded-[8px] border border-black/10 bg-black/[0.03] px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:border-black/15 hover:bg-black/[0.05] hover:text-slate-900"
+            title="点击移除此帖子"
+          >
+            <span className="line-clamp-1 max-w-[220px]">{topic.label}</span>
+            <span className="mono text-[10px] opacity-70">{topic.replyCount}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+

@@ -1,5 +1,5 @@
 import { streamText, tool } from "ai";
-import { google } from "@/lib/models";
+import { glmChatModel } from "@/lib/models";
 import { NextRequest, NextResponse } from "next/server";
 import { withCors } from "@/lib/cors";
 import { z } from "zod";
@@ -52,7 +52,7 @@ async function handler(request: NextRequest) {
 
   try {
     const result = streamText({
-      model: google("gemini-2.0-flash-exp"),
+      model: glmChatModel(),
       messages,
       tools: {
         weather: tool({

@@ -1,511 +1,410 @@
-"use client";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Grid,
-  Typography,
-  Modal,
-  Stack,
-  AppBar,
-  Toolbar,
-  Container,
-  Divider,
-  Paper,
-  Avatar,
-  IconButton,
-  Chip,
-  useTheme,
-  useMediaQuery,
-} from "@mui/material";
+﻿"use client";
+
+import type { ElementType } from "react";
+import type { IUser } from "@cc98/api";
 import Link from "next/link";
-import { MAX_CALL_PER_USER } from "../../config";
 import {
-  Psychology as PsychologyIcon,
-  QuestionAnswer as QuestionAnswerIcon,
-  FolderSpecial as FolderSpecialIcon,
-  Assessment as AssessmentIcon,
-  Close as CloseIcon,
-  ArrowForward as ArrowForwardIcon,
-  Person as PersonIcon,
+  ArrowOutwardRounded,
+  AutoAwesomeRounded,
+  CollectionsBookmarkRounded,
+  ForumRounded,
+  PsychologyRounded,
+  VerifiedRounded,
 } from "@mui/icons-material";
-import { useAuth } from "react-oidc-context";
-import { useState } from "react";
-import { useUserInfo } from "@/store/globalStore";
+import { Avatar, Box, Button, Chip, Paper, Stack, Typography } from "@mui/material";
+import { MAX_CALL_PER_USER } from "../../config";
+import { SiteNav } from "@/components/SiteNav";
 
 interface AuthenticatedAppProps {
-  showModal: boolean;
-  setShowModal: (show: boolean) => void;
   currCount: number;
+  userInfo: IUser | null;
+  userInfoLoading: boolean;
 }
 
-const AuthenticatedApp = ({
-  showModal,
-  setShowModal,
+interface FeatureCard {
+  title: string;
+  description: string;
+  href: string;
+  icon: ElementType;
+  status: string;
+}
+
+const featureCards: FeatureCard[] = [
+  {
+    title: "帖子问答",
+    description: "选一个收藏分组，直接围绕帖子提问。",
+    href: "/summary",
+    icon: ForumRounded,
+    status: "已开放",
+  },
+  {
+    title: "收藏整理",
+    description: "输入维度后，AI 预览并重分组收藏帖子。",
+    href: "/favorites",
+    icon: CollectionsBookmarkRounded,
+    status: "已开放",
+  },
+  {
+    title: "MBTI 画像",
+    description: "根据发帖行为生成论坛人格画像。",
+    href: "/mbti",
+    icon: PsychologyRounded,
+    status: "可直接体验",
+  },
+  {
+    title: "自由聊天",
+    description: "不绑定知识库，直接进入通用对话。",
+    href: "/chat",
+    icon: AutoAwesomeRounded,
+    status: "已开放",
+  },
+];
+
+const formatNumber = (value?: number | null) => {
+  if (value == null) {
+    return "--";
+  }
+
+  return new Intl.NumberFormat("zh-CN").format(value);
+};
+
+const formatDate = (value?: string | null) => {
+  if (!value) {
+    return "未记录";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat("zh-CN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+};
+
+function ProfileRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        px: 2,
+        py: 1.5,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        bgcolor: "rgba(17,17,17,0.02)",
+      }}
+    >
+      <Typography
+        variant="caption"
+        sx={{
+          fontWeight: 700,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+        }}
+      >
+        {label}
+      </Typography>
+      <Typography variant="body2" fontWeight={500}>
+        {value}
+      </Typography>
+    </Paper>
+  );
+}
+
+export default function AuthenticatedApp({
   currCount,
-}: AuthenticatedAppProps) => {
-  const auth = useAuth();
-  const { userInfo, loading: userInfoLoading } = useUserInfo();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const isSmallMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const [hoverStates, setHoverStates] = useState({
-    mbti: false,
-    summary: false,
-    favorites: false,
-    report: false,
-  });
-
-  const setHoverState = (card: string, isHover: boolean) => {
-    // 移动端禁用hover效果
-    if (!isMobile) {
-      setHoverStates((prev) => ({ ...prev, [card]: isHover }));
-    }
-  };
-
-  const handleCardClick = (route: string) => {
-    if (route === "developing") {
-      setShowModal(true);
-    } else {
-      window.location.href = route;
-    }
-  };
-
-  const featureCards = [
+  userInfo,
+  userInfoLoading,
+}: AuthenticatedAppProps) {
+  const remainingQuota = Math.max(0, MAX_CALL_PER_USER - currCount);
+  const avatarSrc = userInfo?.portraitUrl || userInfo?.photourl;
+  const profileTitle =
+    userInfo?.customTitle?.trim() ||
+    userInfo?.displayTitle?.trim() ||
+    userInfo?.privilege ||
+    "CC98 用户";
+  const introduction =
+    userInfo?.introduction?.trim() || "资料已同步，可以直接进入常用功能。";
+  const stats = [
     {
-      id: "mbti",
-      title: "MBTI总结",
-      description:
-        "基于您的发帖记录分析您的MBTI人格类型，提供个性化的人格分析报告。",
-      icon: PsychologyIcon,
-      color: "#667eea",
-      route: "/mbti",
+      label: "今日剩余",
+      value: `${remainingQuota}/${MAX_CALL_PER_USER}`,
+      hint: "AI 配额",
     },
     {
-      id: "summary",
-      title: "帖子上下文问答",
-      description:
-        "对论坛帖子内容进行智能分析，提供上下文相关的问答和内容总结。",
-      icon: QuestionAnswerIcon,
-      color: "#764ba2",
-      route: "/summary",
+      label: "发帖数",
+      value: formatNumber(userInfo?.postCount),
+      hint: "累计发帖",
     },
     {
-      id: "favorites",
-      title: "智能收藏夹整理",
-      description: "使用AI技术自动分类和整理您的收藏内容，让重要信息更易查找。",
-      icon: FolderSpecialIcon,
-      color: "#f093fb",
-      route: "developing",
+      label: "威望",
+      value: formatNumber(userInfo?.prestige),
+      hint: "社区影响力",
     },
     {
-      id: "report",
-      title: "年度报告",
-      description:
-        "生成您的CC98年度使用报告，包含活跃度分析、兴趣偏好等数据洞察。",
-      icon: AssessmentIcon,
-      color: "#f5576c",
-      route: "developing",
+      label: "财富",
+      value: formatNumber(userInfo?.wealth),
+      hint: "账号财富值",
     },
   ];
 
   return (
-    <>
-      {/* 移动端优化的AppBar */}
-      <AppBar
-        position="static"
-        sx={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)" }}
-      >
-        <Toolbar
-          sx={{
-            minHeight: { xs: 56, sm: 64 },
-            px: { xs: 2, sm: 3 },
-          }}
-        >
-          <Typography
-            variant={isMobile ? "h6" : "h5"}
-            component="div"
-            sx={{
-              flexGrow: 1,
-              fontWeight: "bold",
-              fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
-            }}
-          >
-            CC98 Hub
-          </Typography>
-          
-          {/* 用户信息显示 */}
-          {userInfo && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mr: { xs: 2, sm: 3 },
-                bgcolor: "rgba(255, 255, 255, 0.1)",
-                borderRadius: "20px",
-                px: { xs: 1.5, sm: 2 },
-                py: { xs: 0.5, sm: 0.5 },
-              }}
-            >
-              <PersonIcon
+    <div className="page-root">
+      <main className="page-container">
+        <SiteNav current="home" />
+
+        <section className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_360px]">
+          <Paper className="mui-dark-panel" sx={{ p: { xs: 3, md: 4 } }}>
+            <Stack spacing={3}>
+              <Chip
+                icon={<VerifiedRounded />}
+                label={userInfoLoading && !userInfo ? "正在同步 /me" : "当前用户已同步"}
+                variant="outlined"
                 sx={{
-                  color: "white",
-                  fontSize: { xs: "1rem", sm: "1.2rem" },
-                  mr: 1,
+                  alignSelf: "flex-start",
+                  color: "#e4e4e7",
+                  borderColor: "rgba(255,255,255,0.14)",
+                  bgcolor: "rgba(255,255,255,0.04)",
+                  "& .MuiChip-icon": { color: "#ffffff" },
                 }}
               />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "white",
-                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                  fontWeight: "medium",
-                }}
-              >
-                {userInfo.name}
-              </Typography>
-            </Box>
-          )}
-          
-          {/* 加载状态显示 */}
-          {userInfoLoading && (
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                mr: { xs: 2, sm: 3 },
-                bgcolor: "rgba(255, 255, 255, 0.1)",
-                borderRadius: "20px",
-                px: { xs: 1.5, sm: 2 },
-                py: { xs: 0.5, sm: 0.5 },
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  color: "white",
-                  fontSize: { xs: "0.8rem", sm: "0.9rem" },
-                }}
-              >
-                加载中...
-              </Typography>
-            </Box>
-          )}
 
-          <Chip
-            label={`剩余次数: ${Math.max(0, MAX_CALL_PER_USER - currCount)}`}
-            color="secondary"
-            variant="outlined"
-            size={isMobile ? "small" : "medium"}
-            sx={{
-              color: "white",
-              borderColor: "white",
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
-              "& .MuiChip-label": {
-                px: { xs: 1, sm: 1.5 },
-              },
-            }}
-          />
-        </Toolbar>
-      </AppBar>
-
-      <Container
-        maxWidth="lg"
-        sx={{
-          mt: { xs: 2, sm: 3, md: 4 },
-          mb: { xs: 2, sm: 3, md: 4 },
-          px: { xs: 2, sm: 3, md: 4 },
-        }}
-      >
-        {/* 功能介绍 - 移动端优化 */}
-        <Paper
-          elevation={1}
-          sx={{
-            p: { xs: 2, sm: 3 },
-            mb: { xs: 3, sm: 4 },
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            variant={isMobile ? "h5" : "h4"}
-            fontWeight={300}
-            mb={2}
-            sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" } }}
-          >
-            {userInfo ? `欢迎回来，${userInfo.name}！` : "欢迎使用CC98 Hub"}
-          </Typography>
-          <Typography
-            variant="body1"
-            color="text.secondary"
-            sx={{
-              fontSize: { xs: "0.875rem", sm: "1rem" },
-              lineHeight: { xs: 1.4, sm: 1.5 },
-            }}
-          >
-            {userInfo 
-              ? `您的智能CC98助手已准备就绪，为您提供个性化的AI驱动功能体验` 
-              : "您的智能CC98助手，提供多种AI驱动的功能来增强您的论坛体验"
-            }
-          </Typography>
-        </Paper>
-
-        {/* 功能卡片网格 - 移动端响应式 */}
-        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-          {featureCards.map((card) => (
-            <Grid item xs={12} sm={6} md={6} key={card.id}>
-              <Card
-                elevation={4}
-                sx={{
-                  minHeight: { xs: "160px", sm: "170px", md: "180px" },
-                  border: "1px solid #e0e0e0",
-                  cursor: "pointer",
-                  transition: "all 0.3s ease",
-                  transform:
-                    !isMobile &&
-                    hoverStates[card.id as keyof typeof hoverStates]
-                      ? "translateY(-6px)"
-                      : "translateY(0)",
-                  boxShadow:
-                    !isMobile &&
-                    hoverStates[card.id as keyof typeof hoverStates]
-                      ? "0 12px 30px rgba(0,0,0,0.15)"
-                      : "0 4px 12px rgba(0,0,0,0.1)",
-                  "&:hover": {
-                    borderColor: card.color,
-                    // 移动端也保留轻微的hover效果
-                    ...(isMobile && {
-                      boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
-                    }),
-                  },
-                  "&:active": {
-                    // 移动端点击效果
-                    transform: "scale(0.98)",
-                    transition: "transform 0.1s ease",
-                  },
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-                onMouseEnter={() => setHoverState(card.id, true)}
-                onMouseLeave={() => setHoverState(card.id, false)}
-                onClick={() => handleCardClick(card.route)}
-              >
-                <CardContent
-                  sx={{
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    p: { xs: 2, sm: 2.5, md: 3 },
-                  }}
+              <Box>
+                <Typography
+                  variant="h2"
+                  fontWeight={700}
+                  letterSpacing="-0.04em"
+                  sx={{ fontSize: { xs: "2.4rem", md: "3.4rem" }, maxWidth: 860 }}
                 >
-                  <Box
+                  {userInfo
+                    ? `${userInfo.name}，今天想从哪里开始？`
+                    : "资料正在同步，马上就能开始使用。"}
+                </Typography>
+                <Typography mt={2} maxWidth={620} color="rgba(255,255,255,0.72)">
+                  {userInfo
+                    ? "用户资料和今日配额都已经准备好。"
+                    : "授权完成后会自动读取当前账号信息。"}
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gap: 1.5,
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    sm: "repeat(2, minmax(0,1fr))",
+                    xl: "repeat(4, minmax(0,1fr))",
+                  },
+                }}
+              >
+                {stats.map((stat) => (
+                  <Paper
+                    key={stat.label}
+                    variant="outlined"
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: { xs: 1.5, sm: 2 },
+                      px: 2.25,
+                      py: 2.5,
+                      bgcolor: "rgba(255,255,255,0.04)",
+                      borderColor: "rgba(255,255,255,0.12)",
+                      color: "#ffffff",
                     }}
                   >
-                    <Avatar
+                    <Typography
+                      variant="caption"
                       sx={{
-                        bgcolor: `${card.color}20`,
-                        color: card.color,
-                        mr: { xs: 1.5, sm: 2 },
-                        width: { xs: 40, sm: 44, md: 48 },
-                        height: { xs: 40, sm: 44, md: 48 },
+                        fontWeight: 700,
+                        letterSpacing: "0.24em",
+                        textTransform: "uppercase",
+                        color: "rgba(255,255,255,0.58)",
                       }}
                     >
-                      <card.icon fontSize={isMobile ? "small" : "medium"} />
-                    </Avatar>
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography
-                        variant={isSmallMobile ? "subtitle1" : "h6"}
-                        component="h2"
-                        sx={{
-                          fontWeight: "bold",
-                          mb: 0.5,
-                          fontSize: { xs: "1rem", sm: "1.1rem", md: "1.25rem" },
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {card.title}
-                      </Typography>
-                    </Box>
-                    <ArrowForwardIcon
-                      sx={{
-                        color: card.color,
-                        transition: "transform 0.3s ease",
-                        transform:
-                          !isMobile &&
-                          hoverStates[card.id as keyof typeof hoverStates]
-                            ? "translateX(4px)"
-                            : "translateX(0)",
-                        fontSize: { xs: "1.2rem", sm: "1.5rem" },
-                      }}
-                    />
-                  </Box>
+                      {stat.label}
+                    </Typography>
+                    <Typography mt={1.5} variant="h4" fontWeight={700}>
+                      {stat.value}
+                    </Typography>
+                    <Typography mt={1} color="rgba(255,255,255,0.58)">
+                      {stat.hint}
+                    </Typography>
+                  </Paper>
+                ))}
+              </Box>
 
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{
-                      flexGrow: 1,
-                      lineHeight: { xs: 1.4, sm: 1.5, md: 1.6 },
-                      fontSize: { xs: "0.8rem", sm: "0.85rem", md: "0.9rem" },
-                      display: "-webkit-box",
-                      WebkitLineClamp: { xs: 3, sm: 4 },
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
-                    {card.description}
+              <Stack direction="row" flexWrap="wrap" gap={1.5}>
+                <Button
+                  component={Link}
+                  href="/summary"
+                  variant="contained"
+                  endIcon={<ArrowOutwardRounded />}
+                  sx={{
+                    bgcolor: "#ffffff",
+                    color: "#111111",
+                    "&:hover": { bgcolor: "#f4f4f5" },
+                  }}
+                >
+                  打开帖子问答
+                </Button>
+                <Button
+                  component={Link}
+                  href="/favorites"
+                  variant="outlined"
+                  endIcon={<ArrowOutwardRounded />}
+                  sx={{
+                    color: "#ffffff",
+                    borderColor: "rgba(255,255,255,0.2)",
+                    "&:hover": {
+                      borderColor: "rgba(255,255,255,0.3)",
+                      bgcolor: "rgba(255,255,255,0.04)",
+                    },
+                  }}
+                >
+                  整理收藏夹
+                </Button>
+              </Stack>
+            </Stack>
+          </Paper>
+
+          <Paper className="mui-light-panel" sx={{ p: { xs: 3, md: 3.5 } }}>
+            <Stack spacing={3}>
+              <Box>
+                <Typography
+                  variant="overline"
+                  color="text.secondary"
+                  sx={{ letterSpacing: "0.24em", fontWeight: 700 }}
+                >
+                  当前用户
+                </Typography>
+              </Box>
+
+              <Stack direction="row" spacing={2} alignItems="center">
+                <Avatar
+                  src={avatarSrc ?? undefined}
+                  alt={userInfo?.name ?? "CC98 用户头像"}
+                  variant="rounded"
+                  sx={{ width: 64, height: 64, bgcolor: "#111111" }}
+                >
+                  {userInfo?.name?.slice(0, 1) ?? "?"}
+                </Avatar>
+
+                <Box minWidth={0}>
+                  <Typography variant="h4" fontWeight={700} noWrap>
+                    {userInfo?.name ?? "正在获取用户名"}
                   </Typography>
+                  <Typography mt={0.5} color="text.secondary" noWrap>
+                    {profileTitle}
+                  </Typography>
+                </Box>
+              </Stack>
 
-                  {/* 状态指示器 - 移动端优化 */}
-                  <Box
-                    sx={{
-                      mt: { xs: 1.5, sm: 2 },
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    {card.route === "developing" ? (
-                      <Chip
-                        label="即将推出"
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderColor: card.color,
-                          color: card.color,
-                          fontSize: { xs: "0.65rem", sm: "0.75rem" },
-                          height: { xs: 24, sm: 28 },
-                        }}
-                      />
-                    ) : (
-                      <Chip
-                        label="立即体验"
-                        size="small"
-                        sx={{
-                          bgcolor: card.color,
-                          color: "white",
-                          fontSize: { xs: "0.65rem", sm: "0.75rem" },
-                          height: { xs: 24, sm: 28 },
-                        }}
-                      />
-                    )}
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
+              <Paper
+                variant="outlined"
+                sx={{ px: 2, py: 2, bgcolor: "rgba(17,17,17,0.03)" }}
+              >
+                <Typography variant="body2" color="text.secondary" lineHeight={1.9}>
+                  {introduction}
+                </Typography>
+              </Paper>
 
-      {/* 开发中模态框 - 移动端优化 */}
-      <Modal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+              <Stack spacing={1.5}>
+                <ProfileRow
+                  label="UID"
+                  value={userInfo ? `#${userInfo.id}` : "同步中"}
+                />
+                <ProfileRow
+                  label="粉丝 / 关注"
+                  value={
+                    userInfo
+                      ? `${formatNumber(userInfo.fanCount)} / ${formatNumber(
+                          userInfo.followCount
+                        )}`
+                      : "同步中"
+                  }
+                />
+                <ProfileRow
+                  label="注册时间"
+                  value={formatDate(userInfo?.registerTime)}
+                />
+                <ProfileRow
+                  label="最后登录"
+                  value={formatDate(userInfo?.lastLogOnTime)}
+                />
+              </Stack>
+            </Stack>
+          </Paper>
+        </section>
+
         <Box
+          component="section"
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "90%", sm: "80%", md: "450px" },
-            maxWidth: { xs: "350px", sm: "400px", md: "450px" },
-            bgcolor: "background.paper",
-            borderRadius: { xs: 2, sm: 3 },
-            boxShadow: "0 8px 30px rgba(0, 0, 0, 0.12)",
-            p: { xs: 3, sm: 4 },
-            outline: "none",
-            maxHeight: "90vh",
-            overflow: "auto",
+            mt: 3,
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(2, minmax(0,1fr))",
+              xl: "repeat(4, minmax(0,1fr))",
+            },
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-              mb: { xs: 2, sm: 3 },
-            }}
-          >
-            <Typography
-              id="modal-modal-title"
-              variant={isMobile ? "h6" : "h5"}
-              component="h2"
-              fontWeight="bold"
-              sx={{
-                fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                lineHeight: 1.2,
-                pr: 2,
-              }}
-            >
-              🚧 功能开发中
-            </Typography>
-            <IconButton
-              onClick={() => setShowModal(false)}
-              sx={{
-                color: "grey.500",
-                p: { xs: 0.5, sm: 1 },
-              }}
-            >
-              <CloseIcon fontSize={isMobile ? "small" : "medium"} />
-            </IconButton>
-          </Box>
+          {featureCards.map((feature) => {
+            const Icon = feature.icon;
 
-          <Typography
-            id="modal-modal-description"
-            variant="body1"
-            sx={{
-              mb: { xs: 2, sm: 3 },
-              lineHeight: 1.6,
-              fontSize: { xs: "0.9rem", sm: "1rem" },
-            }}
-          >
-            该功能正在紧张开发中，敬请期待！我们会尽快为您带来更多实用的AI功能。
-          </Typography>
+            return (
+              <Paper
+                key={feature.title}
+                component={Link}
+                href={feature.href}
+                className="mui-light-panel"
+                sx={{
+                  p: 3,
+                  textDecoration: "none",
+                  transition: "transform 0.2s ease, box-shadow 0.2s ease",
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    boxShadow: "0 18px 48px rgba(15,23,42,0.08)",
+                  },
+                }}
+              >
+                <Stack spacing={2.5} height="100%">
+                  <Stack direction="row" alignItems="flex-start" justifyContent="space-between">
+                    <Chip
+                      icon={<Icon />}
+                      label={feature.title}
+                      sx={{ bgcolor: "rgba(17,17,17,0.03)" }}
+                    />
+                    <Chip label={feature.status} variant="outlined" />
+                  </Stack>
 
-          <Stack
-            direction={{ xs: "column", sm: "row" }}
-            spacing={{ xs: 1.5, sm: 2 }}
-          >
-            <Button
-              variant="contained"
-              onClick={() => setShowModal(false)}
-              fullWidth={isMobile}
-              sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-                "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
-                },
-                fontSize: { xs: "0.875rem", sm: "1rem" },
-                py: { xs: 1, sm: 1.5 },
-              }}
-            >
-              我知道了
-            </Button>
-            <Button
-              variant="outlined"
-              component={Link}
-              href="/mbti"
-              fullWidth={isMobile}
-              sx={{
-                fontSize: { xs: "0.875rem", sm: "1rem" },
-                py: { xs: 1, sm: 1.5 },
-              }}
-            >
-              体验其他功能
-            </Button>
-          </Stack>
+                  <Typography variant="body2" color="text.secondary" flex={1}>
+                    {feature.description}
+                  </Typography>
+
+                  <Button
+                    component="span"
+                    variant="text"
+                    endIcon={<ArrowOutwardRounded />}
+                    sx={{
+                      alignSelf: "flex-start",
+                      px: 0,
+                      minHeight: 0,
+                      color: "#111111",
+                      "&:hover": { bgcolor: "transparent" },
+                    }}
+                  >
+                    立即进入
+                  </Button>
+                </Stack>
+              </Paper>
+            );
+          })}
         </Box>
-      </Modal>
-    </>
+      </main>
+    </div>
   );
-};
+}
 
-export default AuthenticatedApp;

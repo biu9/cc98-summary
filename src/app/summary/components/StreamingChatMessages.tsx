@@ -1,19 +1,15 @@
-"use client"
-import { forwardRef } from "react";
+﻿"use client";
+
+import { forwardRef, useState } from "react";
+import { ExpandLessRounded, ExpandMoreRounded, PersonRounded, SmartToyRounded } from "@mui/icons-material";
+import { Message } from "ai";
+import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
+import rehypeRaw from "rehype-raw";
+import remarkGfm from "remark-gfm";
 import ChatBubble from "./ChatBubble";
 import LoadingIndicator from "./LoadingIndicator";
 import { IChatMessage } from "../types";
-import { Message } from "ai";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
-import rehypeRaw from 'rehype-raw';
-import { Avatar, Button, Box } from "@mui/material";
-import { ExpandMore, ExpandLess } from "@mui/icons-material";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
-import PersonIcon from "@mui/icons-material/Person";
-import { useState } from "react";
-import { useSummaryStore } from '@/store/summaryStore';
 
 interface StreamingChatMessagesProps {
   messages: IChatMessage[];
@@ -21,94 +17,87 @@ interface StreamingChatMessagesProps {
   loading: boolean;
 }
 
-// 扩展Message类型以包含参考帖子信息
 interface ExtendedMessage extends Message {
   topicTitles?: string[];
   knowledgeBaseName?: string;
 }
 
-const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
-  const isUser = message.role === 'user';
+function StreamingChatBubble({ message }: { message: Message }) {
   const [topicsExpanded, setTopicsExpanded] = useState(false);
-  
-  // 从消息的annotations中获取存储的参考帖子信息
+  const isUser = message.role === "user";
   const extendedMessage = message as ExtendedMessage;
   const topicTitles = extendedMessage.topicTitles || [];
   const knowledgeBaseName = extendedMessage.knowledgeBaseName;
-  
-  const shouldShowTopics = topicTitles && topicTitles.length > 0;
-  const TOPICS_DISPLAY_LIMIT = 5;
-  const hasMoreTopics = shouldShowTopics && topicTitles.length > TOPICS_DISPLAY_LIMIT;
-  const displayTopics = topicsExpanded 
-    ? topicTitles 
-    : topicTitles?.slice(0, TOPICS_DISPLAY_LIMIT);
+  const hasMoreTopics = topicTitles.length > 5;
+  const displayTopics = topicsExpanded ? topicTitles : topicTitles.slice(0, 5);
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 chat-bubble`}>
-      <div className={`flex ${isUser ? 'flex-row-reverse' : 'flex-row'} items-start max-w-[85%]`}>
-        <Avatar
-          className={`${isUser ? 'ml-2' : 'mr-2'} flex-shrink-0`}
-          sx={{
-            width: 32,
-            height: 32,
-            backgroundColor: isUser ? '#667eea' : '#4a90e2'
-          }}
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} chat-bubble`}>
+      <div
+        className={`flex max-w-[88%] items-start gap-3 ${
+          isUser ? "flex-row-reverse" : "flex-row"
+        }`}
+      >
+        <div
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[12px] ${
+            isUser ? "bg-[#111111] text-white" : "bg-[#111111] text-white"
+          }`}
         >
-          {isUser ? <PersonIcon fontSize="small" /> : <SmartToyIcon fontSize="small" />}
-        </Avatar>
-        <div className={`px-4 py-3 rounded-2xl ${isUser
-          ? 'message-bubble-user text-white rounded-br-md'
-          : 'message-bubble-bot text-gray-800 rounded-bl-md'
-          }`}>
-          {shouldShowTopics && (
-            <div className="text-xs opacity-80 mb-2 p-2 bg-black bg-opacity-10 rounded-lg">
-              <div className="flex items-center justify-between mb-1">
-                <span>📋 {isUser ? '选择的' : '参考'}帖子{knowledgeBaseName ? ` (来自知识库: ${knowledgeBaseName})` : ''}:</span>
+          {isUser ? (
+            <PersonRounded className="text-[1.1rem]" />
+          ) : (
+            <SmartToyRounded className="text-[1.1rem]" />
+          )}
+        </div>
+
+        <div
+          className={`rounded-[12px] px-5 py-4 ${
+            isUser ? "message-bubble-user text-white" : "message-bubble-bot text-slate-800"
+          }`}
+        >
+          {topicTitles.length > 0 && (
+            <div className="mb-3 rounded-[10px] bg-black/10 px-3 py-3 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span>
+                  {isUser ? "当前提问引用" : "本轮回答参考"}
+                  {knowledgeBaseName ? ` · ${knowledgeBaseName}` : ""}
+                </span>
                 {hasMoreTopics && (
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => setTopicsExpanded(!topicsExpanded)}
-                    startIcon={topicsExpanded ? <ExpandLess /> : <ExpandMore />}
-                    sx={{ 
-                      fontSize: '0.65rem',
-                      minWidth: 'auto',
-                      padding: '1px 4px',
-                      color: 'inherit',
-                      opacity: 0.8,
-                      '&:hover': {
-                        opacity: 1
-                      }
-                    }}
+                  <button
+                    type="button"
+                    onClick={() => setTopicsExpanded((value) => !value)}
+                    className="inline-flex items-center gap-1 rounded-[8px] border border-white/15 px-2 py-1 text-[11px] transition hover:bg-white/10"
                   >
-                    {topicsExpanded ? '收起' : `展开全部 (${topicTitles.length})`}
-                  </Button>
+                    {topicsExpanded ? (
+                      <>
+                        <ExpandLessRounded className="text-[0.9rem]" />
+                        收起
+                      </>
+                    ) : (
+                      <>
+                        <ExpandMoreRounded className="text-[0.9rem]" />
+                        全部
+                      </>
+                    )}
+                  </button>
                 )}
               </div>
-              <Box sx={{ 
-                maxHeight: topicsExpanded ? 'none' : '100px',
-                overflow: 'hidden',
-                transition: 'max-height 0.3s ease-in-out'
-              }}>
-                <ul className="mt-1 pl-2">
-                  {displayTopics?.map((title, index) => (
-                    <li key={index} className="text-xs mb-1">
-                      • {title.length > 40 ? `${title.substring(0, 40)}...` : title}
-                    </li>
-                  ))}
-                </ul>
-              </Box>
-              {hasMoreTopics && !topicsExpanded && (
-                <div className="text-center mt-1 opacity-70">
-                  <span className="text-xs">
-                    还有 {topicTitles.length - TOPICS_DISPLAY_LIMIT} 个帖子...
-                  </span>
-                </div>
-              )}
+
+              <ul className="mt-2 space-y-1">
+                {displayTopics.map((title, index) => (
+                  <li key={`${title}-${index}`} className="leading-6 opacity-90">
+                    {title}
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
-          <div className={`text-sm leading-relaxed prose prose-sm max-w-none ${isUser ? 'prose-invert' : 'prose-slate'
-            }`}>
+
+          <div
+            className={`prose prose-sm max-w-none text-sm leading-7 ${
+              isUser ? "prose-invert" : "prose-slate"
+            }`}
+          >
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               rehypePlugins={[rehypeHighlight, rehypeRaw]}
@@ -116,46 +105,48 @@ const StreamingChatBubble: React.FC<{ message: Message }> = ({ message }) => {
               {message.content}
             </ReactMarkdown>
           </div>
-          <div className={`text-xs mt-2 opacity-70`}>
-            {message.createdAt ? new Date(message.createdAt).toLocaleTimeString() : new Date().toLocaleTimeString()}
+
+          <div className="mt-3 text-xs opacity-70">
+            {message.createdAt
+              ? new Date(message.createdAt).toLocaleTimeString("zh-CN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : new Date().toLocaleTimeString("zh-CN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
           </div>
         </div>
       </div>
     </div>
   );
-};
+}
 
 const StreamingChatMessages = forwardRef<HTMLDivElement, StreamingChatMessagesProps>(
   ({ messages, aiMessages, loading }, ref) => {
-    // 主要显示AI消息历史，传统消息作为备用（系统消息等）
-    const systemMessages = messages.filter(msg => msg.type === 'system');
-    
+    const systemMessages = messages.filter((message) => message.type === "system");
+
     return (
-      <div 
-        className="bg-white p-4 overflow-y-auto chat-messages custom-scrollbar"
-        style={{ 
-          flex: '1 1 auto',
-          minHeight: '400px',
-          maxHeight: 'none'
-        }}
-      >
-        {/* 显示系统消息 */}
-        {systemMessages.map((message) => (
-          <ChatBubble key={`system-${message.id}`} message={message} />
-        ))}
-        
-        {/* 显示AI消息历史 */}
-        {aiMessages.map((message, index) => (
-          <StreamingChatBubble key={`ai-${message.id || index}`} message={message} />
-        ))}
-        
-        {loading && <LoadingIndicator />}
-        <div ref={ref} />
+      <div className="chat-messages custom-scrollbar mt-4 min-h-[420px] rounded-[14px] border border-black/5 bg-white/70 px-4 py-4 md:px-5">
+        <div className="space-y-4">
+          {systemMessages.map((message) => (
+            <ChatBubble key={`system-${message.id}`} message={message} />
+          ))}
+
+          {aiMessages.map((message, index) => (
+            <StreamingChatBubble key={`ai-${message.id || index}`} message={message} />
+          ))}
+
+          {loading && <LoadingIndicator />}
+          <div ref={ref} />
+        </div>
       </div>
     );
   }
 );
 
-StreamingChatMessages.displayName = 'StreamingChatMessages';
+StreamingChatMessages.displayName = "StreamingChatMessages";
 
-export default StreamingChatMessages; 
+export default StreamingChatMessages;
+

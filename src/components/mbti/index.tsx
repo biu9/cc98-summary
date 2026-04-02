@@ -18,21 +18,21 @@ export default function MBTI() {
   } = useMBTIStore();
   const auth = useAuth();
 
-  // 获取用户资料
+  // 获取用户资料（CC98 API 使用 access_token）
   useEffect(() => {
-    if (auth.user?.refresh_token) {
-      fetchProfile(auth.user.refresh_token);
+    if (auth.user?.access_token) {
+      fetchProfile(auth.user.access_token);
     }
-  }, [auth.user?.refresh_token, fetchProfile]);
+  }, [auth.user?.access_token, fetchProfile]);
 
   const handleClick = async () => {
-    if (!auth.user?.refresh_token) {
-      setFeedback("refresh_token is not defined");
+    if (!auth.user?.access_token) {
+      setFeedback("访问令牌无效，请重新登录后再试");
       return;
     }
-    
-    await handleMBTITest(auth.user.refresh_token, setFeedback);
-  }
+
+    await handleMBTITest(auth.user.access_token, setFeedback);
+  };
 
   if (!mbti) {
     return (

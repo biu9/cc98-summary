@@ -1,16 +1,9 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { generateText } from "ai";
+import { glmChatModel } from "@/lib/models";
 import { IGeneralResponse, ISummaryRequest } from "@request/api";
 import { withCors } from "@/lib/cors";
-
-const genAi = new GoogleGenerativeAI(process.env.API_KEY!);
-
-const model = genAi.getGenerativeModel({
-  model: "gemini-1.5-flash", generationConfig: {
-    temperature: 0
-  }
-});
 
 /**
  * @swagger
@@ -59,12 +52,14 @@ const model = genAi.getGenerativeModel({
  *         description: 预检请求成功
  */
 async function handler(request: NextRequest): Promise<NextResponse<IGeneralResponse>> {
-  const { text } = await request.json() as ISummaryRequest;
+  const { text } = (await request.json()) as ISummaryRequest;
 
   try {
-    const result = await model.generateContent(text);
-    const response = result.response;
-    const resultText = response.text();
+    const { text: resultText } = await generateText({
+      model: glmChatModel(),
+      prompt: text,
+      temperature: 0,
+    });
 
     return NextResponse.json({
       isOk: true,

@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 import { streamText } from "ai";
-import { google } from "@/lib/models";
+import { glmChatModel } from "@/lib/models";
 import { NextRequest } from "next/server";
 import { withCors } from "@/lib/cors";
 
@@ -74,7 +74,7 @@ ${knowledgeBase}
     const enhancedMessages = [systemMessage, ...messages];
 
     const result = streamText({
-      model: google("gemini-2.0-flash-exp"),
+      model: glmChatModel(),
       messages: enhancedMessages,
       temperature: 0.1, // 降低温度以获得更准确的回答
       maxTokens: 2000,

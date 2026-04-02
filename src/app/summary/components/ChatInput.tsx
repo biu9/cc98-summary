@@ -1,6 +1,7 @@
-"use client"
-import { Input, IconButton } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
+﻿"use client";
+
+import { CircularProgress } from "@mui/material";
+import { SendRounded } from "@mui/icons-material";
 import { IReferenceProps } from "../types";
 
 interface ChatInputProps {
@@ -11,16 +12,16 @@ interface ChatInputProps {
   selectedTopics: IReferenceProps[];
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
+export default function ChatInput({
   question,
   setQuestion,
   onSubmit,
   loading,
-  selectedTopics
-}) => {
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
+  selectedTopics,
+}: ChatInputProps) {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
       onSubmit();
     }
   };
@@ -28,44 +29,41 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const isDisabled = loading || selectedTopics.length === 0 || !question.trim();
 
   return (
-    <div className="flex items-end space-x-3">
+    <div className="flex flex-col gap-3 md:flex-row md:items-end">
       <div className="flex-1">
-        <Input
+        <textarea
           value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder={selectedTopics.length > 0 ? "输入您的问题... (按Enter发送)" : "请先选择参考帖子"}
+          onChange={(event) => setQuestion(event.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={selectedTopics.length === 0}
-          multiline
-          maxRows={4}
-          fullWidth
-          className="w-full"
+          placeholder={
+            selectedTopics.length > 0
+              ? "输入你的问题，按 Enter 发送，Shift + Enter 换行..."
+              : "请先选择一个知识库，再输入问题"
+          }
+          className="min-h-[120px] w-full resize-none rounded-[10px] border border-black/5 bg-white px-4 py-4 text-sm leading-7 text-slate-700 outline-none transition focus:border-black/20 focus:ring-4 focus:ring-black/5 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
         />
       </div>
-      <IconButton
+
+      <button
+        type="button"
         onClick={onSubmit}
         disabled={isDisabled}
-        sx={{
-          backgroundColor: '#667eea',
-          color: 'white',
-          width: 48,
-          height: 48,
-          '&:hover': {
-            backgroundColor: '#5a67d8',
-            transform: 'scale(1.05)',
-          },
-          '&:disabled': {
-            backgroundColor: '#e5e7eb',
-            color: '#9ca3af',
-            transform: 'none',
-          },
-          transition: 'all 0.2s ease'
-        }}
+        className="button-dark h-[52px] min-w-[144px] disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <SendIcon />
-      </IconButton>
+        {loading ? (
+          <>
+            <CircularProgress size={16} sx={{ color: "white" }} />
+            发送中
+          </>
+        ) : (
+          <>
+            <SendRounded className="text-[1rem]" />
+            发送问题
+          </>
+        )}
+      </button>
     </div>
   );
-};
+}
 
-export default ChatInput; 

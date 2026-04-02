@@ -18,10 +18,10 @@ interface MBTIState {
   setLoading: (loading: boolean) => void;
   setProfile: (profile: IUser | undefined) => void;
 
-  // 业务逻辑
-  fetchProfile: (refreshToken: string) => Promise<void>;
+  // 业务逻辑（CC98 API 需 access_token）
+  fetchProfile: (accessToken: string) => Promise<void>;
   handleMBTITest: (
-    refreshToken: string,
+    accessToken: string,
     setFeedback: (msg: string) => void
   ) => Promise<void>;
   reset: () => void;
@@ -53,11 +53,11 @@ export const useMBTIStore = create<MBTIState>()(
       setProfile: (profile) => set({ profile }),
 
       // 获取用户资料
-      fetchProfile: async (refreshToken: string) => {
+      fetchProfile: async (accessToken: string) => {
         try {
           const profile = await GET<IUser>(
             `${API_ROOT}/me?sf_request_type=fetch`,
-            refreshToken
+            accessToken
           );
           set({ profile });
         } catch (error) {
@@ -67,7 +67,7 @@ export const useMBTIStore = create<MBTIState>()(
 
       // 处理MBTI测试
       handleMBTITest: async (
-        refreshToken: string,
+        accessToken: string,
         setFeedback: (msg: string) => void
       ) => {
         const { profile } = get();
@@ -80,12 +80,12 @@ export const useMBTIStore = create<MBTIState>()(
         set({ loading: true });
 
         try {
-          if (!refreshToken) {
-            setFeedback("refresh_token is not defined");
+          if (!accessToken) {
+            setFeedback("访问令牌无效，请重新登录后再试");
             return;
           }
 
-          const topicContent = await getTopicContent(refreshToken);
+          const topicContent = await getTopicContent(accessToken);
           const res = await handleMBTI(
             `topic: ${topicContent}`,
             profile?.name || ""
